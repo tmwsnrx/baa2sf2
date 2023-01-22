@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include <vector>
 
 #include "Instrument.hpp"
@@ -10,7 +11,7 @@ class InstrumentBank
 {
 private:
   uint8_t id;
-  std::vector<Instrument> instruments_;
+  std::vector<std::unique_ptr<Instrument>> instruments_;
 };
 
 }

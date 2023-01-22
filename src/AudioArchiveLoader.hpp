@@ -21,6 +21,13 @@ private:
   bool read_command();
   void skip_marker(uint32_t marker, size_t num_words);
 
+  void read_bnk(uint32_t group, uint32_t offset);
+
+  void save_position();
+  void restore_position();
+
+  uint32_t saved_position_{};
+
   Poco::BinaryReader reader_;
   Poco::Logger& logger_;
 };

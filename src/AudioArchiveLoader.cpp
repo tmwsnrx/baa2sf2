@@ -1,6 +1,8 @@
 #include <cstdint>
 
 #include "AudioArchiveLoader.hpp"
+#include "BnkParser.hpp"
+#include "InstrumentBank.hpp"
 
 static constexpr uint32_t MARKER_BEGIN_ARCHIVE = 0x41415f3c;
 static constexpr uint32_t MARKER_END_ARCHIVE = 0x3e5f4141;
@@ -61,6 +63,22 @@ bool AudioArchiveLoader::read_command()
       return false;
 
     case MARKER_BNK:
+    {
+      uint32_t group{};
+      uint32_t offset{};
+
+      reader_ >> group;
+      reader_ >> offset;
+
+      logger_.information("bnk (group=%u, offset=%x)", group, offset);
+
+      save_position();
+      read_bnk(group, offset);
+      restore_position();
+
+      break;
+    }
+
     case MARKER_BSC:
     case MARKER_BST:
     case MARKER_BSTN:
@@ -82,6 +100,24 @@ void AudioArchiveLoader::skip_marker(uint32_t marker, size_t num_words)
 {
   logger_.debug("Skipping marker %x", marker);
   reader_.stream().seekg(num_words * sizeof(uint32_t), std::ios::cur);
+}
+
+void AudioArchiveLoader::read_bnk(uint32_t group, uint32_t offset)
+{
+  reader_.stream().seekg(offset + sizeof(uint32_t), std::ios::beg);
+
+  BnkParser bnk_parser{group, reader_.stream(), logger_};
+  auto instrument_bank = bnk_parser.parse();
+}
+
+void AudioArchiveLoader::save_position()
+{
+  saved_position_ = reader_.stream().tellg();
+}
+
+void AudioArchiveLoader::restore_position()
+{
+  reader_.stream().seekg(saved_position_, std::ios::beg);
 }
 
 }
