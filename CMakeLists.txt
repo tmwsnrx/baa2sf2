@@ -7,7 +7,10 @@ find_package(Poco REQUIRED Foundation)
 
 add_executable(baa2sf2
   src/main.cpp
+
   src/AudioArchiveLoader.cpp
+  src/BnkParser.cpp
+  src/utils.cpp
 )
 
 target_link_libraries(

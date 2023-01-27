@@ -12,6 +12,8 @@ namespace z2sound
 
 class BasicInstrument : public Instrument
 {
+friend class BnkParser;
+
 public:
   struct KeyRegion
   {

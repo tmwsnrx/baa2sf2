@@ -3,6 +3,7 @@
 #include "AudioArchiveLoader.hpp"
 #include "BnkParser.hpp"
 #include "InstrumentBank.hpp"
+#include "utils.hpp"
 
 static constexpr uint32_t MARKER_BEGIN_ARCHIVE = 0x41415f3c;
 static constexpr uint32_t MARKER_END_ARCHIVE = 0x3e5f4141;
@@ -98,7 +99,7 @@ bool AudioArchiveLoader::read_command()
 
 void AudioArchiveLoader::skip_marker(uint32_t marker, size_t num_words)
 {
-  logger_.debug("Skipping marker %x", marker);
+  logger_.debug("Skipping marker %s", marker_to_string(marker));
   reader_.stream().seekg(num_words * sizeof(uint32_t), std::ios::cur);
 }
 
@@ -106,7 +107,7 @@ void AudioArchiveLoader::read_bnk(uint32_t group, uint32_t offset)
 {
   reader_.stream().seekg(offset + sizeof(uint32_t), std::ios::beg);
 
-  BnkParser bnk_parser{group, reader_.stream(), logger_};
+  BnkParser bnk_parser{group, reader_.stream(), offset, logger_};
   auto instrument_bank = bnk_parser.parse();
 }
 

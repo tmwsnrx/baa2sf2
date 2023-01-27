@@ -74,5 +74,5 @@
         "complex": "cpp",
         "typeindex": "cpp"
     },
-    "cmake.sourceDirectory": "/home/tw/src/baa2sf2"
+    "cmake.sourceDirectory": "${workspaceFolder}/."
 }
