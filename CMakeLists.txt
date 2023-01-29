@@ -10,6 +10,7 @@ add_executable(baa2sf2
 
   src/AudioArchiveLoader.cpp
   src/BnkParser.cpp
+  src/PercussionSet.cpp
   src/utils.cpp
 )
 
