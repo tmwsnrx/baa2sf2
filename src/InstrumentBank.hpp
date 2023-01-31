@@ -12,21 +12,34 @@ class InstrumentBank
 friend class BnkParser;
 
 public:
-  struct Oscillator
+  struct Envelope
+  {
+    uint16_t curve_type;
+    uint16_t time;
+    
+    union
+    {
+      uint16_t volume;
+      uint16_t index;
+    };
+  };
+
+  struct OscillatorConfig
   {
     uint8_t b1;
 
-    float f1;
-    float f2;
+    float value_offset;
+    float value_multiplier;
+    float time_scale;
 
-    uint32_t u1;
-
-    uint32_t offset1;
-    uint32_t offset2;
+    std::optional<std::vector<Envelope>::const_iterator> pre_sustain = std::nullopt;
+    std::optional<std::vector<Envelope>::const_iterator> post_sustain = std::nullopt;
   };
 
 private:
   uint8_t id;
+  std::vector<Envelope> envelopes_;
+  std::vector<OscillatorConfig> oscillators_;
   std::vector<std::unique_ptr<Instrument>> instruments_;
 };
 

@@ -71,13 +71,57 @@ std::optional<InstrumentBank> BnkParser::parse()
     return std::nullopt;
   }
 
+  InstrumentBank bank;
+
+  reader_.stream().seekg(envt_chunk.value().get().position);
+  const size_t num_envelopes = envt_chunk.value().get().size / 6;
+  bank.envelopes_.reserve(num_envelopes);
+
+  for (size_t envelope_index = 0; envelope_index < num_envelopes; envelope_index++)
+  {
+    InstrumentBank::Envelope envelope;
+    reader_ >> envelope.curve_type;
+    reader_ >> envelope.time;
+    reader_ >> envelope.volume;
+
+    bank.envelopes_.emplace_back(envelope);
+  }
+
+  uint32_t num_oscillators{};
+  reader_.stream().seekg(osct_chunk.value().get().position);
+  reader_ >> num_oscillators;
+  for (size_t oscillator_index = 0; oscillator_index < num_oscillators; oscillator_index++)
+  {
+    InstrumentBank::OscillatorConfig osci;
+    reader_.stream().seekg(sizeof(uint32_t), std::ios::cur);
+
+    reader_ >> osci.b1;
+    reader_.stream().seekg(3, std::ios::cur);
+
+    reader_ >> osci.value_multiplier;
+
+    uint32_t attack_envt_offset{};
+    uint32_t release_envt_offset{};
+    reader_ >> attack_envt_offset;
+    reader_ >> release_envt_offset;
+    const size_t attack_envt_index = attack_envt_offset / 6;
+    const size_t release_envt_index = release_envt_offset / 6;
+
+    osci.pre_sustain = bank.envelopes_.cbegin() + attack_envt_index;
+    osci.post_sustain = bank.envelopes_.cbegin() + release_envt_index;
+
+    reader_ >> osci.time_scale;
+    reader_ >> osci.value_offset;
+
+    bank.oscillators_.emplace_back(osci);
+  }
+
+
   uint32_t num_instruments{};
   reader_.stream().seekg(list_chunk.value().get().position);
   reader_ >> num_instruments;
 
   std::streampos instrument_list_position = reader_.stream().tellg();
-
-  InstrumentBank bank;
 
   for (size_t instrument = 0; instrument < num_instruments; instrument++)
   {
@@ -235,8 +279,8 @@ PercussionSet BnkParser::parse_perc()
     reader_.stream().seekg(base_offset_ + offset + sizeof(uint32_t));
 
     PercussionSet::PercussionEntry percussion_entry;
-    reader_ >> percussion_entry.f1;
-    reader_ >> percussion_entry.f2;
+    reader_ >> percussion_entry.volume_multiplier_2;
+    reader_ >> percussion_entry.pitch_multiplier_2;
     reader_ >> percussion_entry.pan;
 
     reader_.stream().seekg(1, std::ios::cur);
@@ -254,8 +298,8 @@ PercussionSet BnkParser::parse_perc()
 
     reader_.stream().seekg(6, std::ios::cur);
     reader_ >> percussion_entry.sample_id;
-    reader_ >> percussion_entry.f3;
-    reader_ >> percussion_entry.f4;
+    reader_ >> percussion_entry.volume_multiplier;
+    reader_ >> percussion_entry.pitch_multiplier;
 
     percussion_set.set_entry(static_cast<Key>(entry), percussion_entry);
   }
