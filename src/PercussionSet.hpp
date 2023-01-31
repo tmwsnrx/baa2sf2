@@ -14,16 +14,16 @@ class PercussionSet : public Instrument
 public:
   struct PercussionEntry
   {
-    float f1;
-    float f2;
+    float volume_multiplier_2; // as part of the only velocity region
+    float pitch_multiplier_2; // as part of the only velocity region
 
     Pan pan;
     uint16_t release;
 
     SampleId sample_id;
 
-    float f3;
-    float f4;
+    float volume_multiplier;
+    float pitch_multiplier;
   };
 
   void set_entry(Key key, PercussionEntry entry);
