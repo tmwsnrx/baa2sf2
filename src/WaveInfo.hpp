@@ -7,7 +7,7 @@ namespace z2sound
 
 struct WaveInfo
 {
-  uint8_t _unknown1;
+  uint8_t codec;
   uint8_t root_key;
 
   float sample_rate;

@@ -23,10 +23,12 @@ std::optional<WaveBank> WsysParser::parse()
   reader_ >> wbct_offset;
 
   reader_.stream().seekg(base_offset_ + wbct_offset + 8);
-  
+
   uint32_t group_count{};
   reader_ >> group_count;
   bank.wave_groups_.reserve(group_count);
+
+  logger_.debug("Found %u samples in %u groups", wave_table_size, group_count);
 
   for (size_t group = 0; group < group_count; group++)
   {
@@ -60,7 +62,7 @@ std::optional<WaveBank> WsysParser::parse()
       reader_.stream().seekg(base_offset_ + wave_offset + 1);
 
       WaveInfo wave_info;
-      reader_ >> wave_info._unknown1;
+      reader_ >> wave_info.codec;
       reader_ >> wave_info.root_key;
       reader_.stream().seekg(1, std::ios::cur);
 
