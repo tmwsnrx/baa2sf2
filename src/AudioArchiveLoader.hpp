@@ -22,6 +22,7 @@ private:
   void skip_marker(uint32_t marker, size_t num_words);
 
   void read_bnk(uint32_t group, uint32_t offset);
+  void read_wsys(uint32_t group, uint32_t offset);
 
   void save_position();
   void restore_position();

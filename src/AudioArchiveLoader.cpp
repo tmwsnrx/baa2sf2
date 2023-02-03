@@ -4,6 +4,7 @@
 #include "BnkParser.hpp"
 #include "InstrumentBank.hpp"
 #include "utils.hpp"
+#include "WsysParser.hpp"
 
 static constexpr uint32_t MARKER_BEGIN_ARCHIVE = 0x41415f3c;
 static constexpr uint32_t MARKER_END_ARCHIVE = 0x3e5f4141;
@@ -87,8 +88,22 @@ bool AudioArchiveLoader::read_command()
       break;
 
     case MARKER_WS:
-      skip_marker(marker, 3);
+    {
+      uint32_t group{};
+      uint32_t offset{};
+
+      reader_ >> group;
+      reader_ >> offset;
+      reader_.stream().seekg(4, std::ios::cur);
+
+      logger_.information("ws (group=%u, offset=%x)", group, offset);
+
+      save_position();
+      read_wsys(group, offset);
+      restore_position();
+
       break;
+    }
 
     default:
       return false;
@@ -109,6 +124,14 @@ void AudioArchiveLoader::read_bnk(uint32_t group, uint32_t offset)
 
   BnkParser bnk_parser{group, reader_.stream(), offset, logger_};
   auto instrument_bank = bnk_parser.parse();
+}
+
+void AudioArchiveLoader::read_wsys(uint32_t group, uint32_t offset)
+{
+  reader_.stream().seekg(offset + sizeof(uint32_t), std::ios::beg);
+
+  WsysParser wsys_parser{group, reader_.stream(), offset, logger_};
+  auto wave_bank = wsys_parser.parse();
 }
 
 void AudioArchiveLoader::save_position()

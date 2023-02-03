@@ -12,6 +12,7 @@ add_executable(baa2sf2
   src/BnkParser.cpp
   src/PercussionSet.cpp
   src/utils.cpp
+  src/WsysParser.cpp
 )
 
 target_link_libraries(
