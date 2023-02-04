@@ -10,8 +10,11 @@ add_executable(baa2sf2
 
   src/AudioArchiveLoader.cpp
   src/BnkParser.cpp
+  src/InstrumentBank.cpp
   src/PercussionSet.cpp
   src/utils.cpp
+  src/WaveBank.cpp
+  src/WaveGroup.cpp
   src/WsysParser.cpp
 )
 

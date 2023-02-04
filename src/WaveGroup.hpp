@@ -8,7 +8,10 @@ namespace z2sound
 class WaveGroup
 {
 public:
-  std::string filename;
+  void set_filename(std::string&& filename);
+
+private:
+  std::string filename_;
 };
 
 }

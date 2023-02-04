@@ -27,6 +27,7 @@ private:
   void save_position();
   void restore_position();
 
+  AudioArchive archive_;
   uint32_t saved_position_{};
 
   Poco::BinaryReader reader_;

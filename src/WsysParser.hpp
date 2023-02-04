@@ -17,12 +17,12 @@ namespace z2sound
 class WsysParser
 {
 public:
-  WsysParser(uint32_t group, std::istream& stream, std::streamoff base_offset, Poco::Logger& logger);
+  WsysParser(uint32_t bank_id, std::istream& stream, std::streamoff base_offset, Poco::Logger& logger);
 
   std::optional<WaveBank> parse();
 
 private:
-  uint32_t group_;
+  uint8_t bank_id_;
   std::streamoff base_offset_;
 
   Poco::BinaryReader reader_;

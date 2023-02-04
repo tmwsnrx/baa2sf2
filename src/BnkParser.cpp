@@ -18,8 +18,8 @@ static constexpr uint32_t MARKER_PMAP_ENTRY = 0x506d6170;
 namespace z2sound
 {
 
-BnkParser::BnkParser(uint32_t group, std::istream &stream, std::streamoff base_offset, Poco::Logger &logger)
-    : group_{group}, base_offset_{base_offset}, size_{0}, reader_{stream, Poco::BinaryReader::BIG_ENDIAN_BYTE_ORDER}, logger_{logger}
+BnkParser::BnkParser(uint32_t wave_bank_id, std::istream &stream, std::streamoff base_offset, Poco::Logger &logger)
+    : wave_bank_id_{static_cast<uint8_t>(wave_bank_id)}, base_offset_{base_offset}, size_{0}, reader_{stream, Poco::BinaryReader::BIG_ENDIAN_BYTE_ORDER}, logger_{logger}
 {
 }
 
@@ -38,7 +38,7 @@ std::optional<InstrumentBank> BnkParser::parse()
     return std::nullopt;
   }
 
-  logger_.debug("Start parsing BNK (group %u, ID %u, %u bytes)", group_, id, size_);
+  logger_.debug("Start parsing BNK (ID %u, wave bank %u, %u bytes)", wave_bank_id_, id, size_);
 
   reader_.stream().seekg(4 * sizeof(uint32_t), std::ios::cur);
   enumerate_chunks();
@@ -71,7 +71,7 @@ std::optional<InstrumentBank> BnkParser::parse()
     return std::nullopt;
   }
 
-  InstrumentBank bank;
+  InstrumentBank bank{static_cast<uint8_t>(id), wave_bank_id_};
 
   reader_.stream().seekg(envt_chunk.value().get().position);
   const size_t num_envelopes = envt_chunk.value().get().size / 6;

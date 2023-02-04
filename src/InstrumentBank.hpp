@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <optional>
 #include <vector>
 
 #include "Instrument.hpp"
@@ -36,8 +37,14 @@ public:
     std::optional<std::vector<Envelope>::const_iterator> post_sustain = std::nullopt;
   };
 
+  InstrumentBank(uint8_t id, uint8_t wave_bank_id);
+
+  uint8_t get_id() const;
+  uint8_t get_wave_bank_id() const;
+
 private:
-  uint8_t id;
+  uint8_t id_;
+  uint8_t wave_bank_id_;
   std::vector<Envelope> envelopes_;
   std::vector<OscillatorConfig> oscillators_;
   std::vector<std::unique_ptr<Instrument>> instruments_;

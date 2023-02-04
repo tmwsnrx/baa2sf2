@@ -19,7 +19,7 @@ namespace z2sound
 class BnkParser
 {
 public:
-  BnkParser(uint32_t group, std::istream& stream, std::streamoff base_offset, Poco::Logger& logger);
+  BnkParser(uint32_t wave_bank_id, std::istream& stream, std::streamoff base_offset, Poco::Logger& logger);
   std::optional<InstrumentBank> parse();
 
 private:
@@ -36,7 +36,7 @@ private:
   BasicInstrument parse_inst();
   PercussionSet parse_perc();
 
-  uint32_t group_;
+  uint8_t wave_bank_id_;
   std::streamoff base_offset_;
   uint32_t size_;
   std::map<uint32_t, ChunkInfo> chunk_table_;

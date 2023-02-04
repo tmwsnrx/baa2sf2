@@ -1,15 +1,17 @@
 #include "WsysParser.hpp"
 
+#include <utility>
+
 namespace z2sound
 {
 
-WsysParser::WsysParser(uint32_t group, std::istream& stream, std::streamoff base_offset, Poco::Logger& logger)
-: group_{group}, base_offset_{base_offset}, reader_{stream, Poco::BinaryReader::BIG_ENDIAN_BYTE_ORDER}, logger_{logger}
+WsysParser::WsysParser(uint32_t bank_id, std::istream& stream, std::streamoff base_offset, Poco::Logger& logger)
+: bank_id_{static_cast<uint8_t>(bank_id)}, base_offset_{base_offset}, reader_{stream, Poco::BinaryReader::BIG_ENDIAN_BYTE_ORDER}, logger_{logger}
 {}
 
 std::optional<WaveBank> WsysParser::parse()
 {
-  WaveBank bank;
+  WaveBank bank{bank_id_};
 
   uint32_t wave_table_size{};
   reader_.stream().seekg(8, std::ios::cur);
@@ -51,7 +53,9 @@ std::optional<WaveBank> WsysParser::parse()
     reader_.stream().seekg(base_offset_ + group_offset);
 
     WaveGroup wave_group;
-    reader_ >> wave_group.filename;
+    std::string filename;
+    reader_ >> filename;
+    wave_group.set_filename(std::move(filename));
 
     for (size_t wave = 0; wave < num_waves; wave++)
     {

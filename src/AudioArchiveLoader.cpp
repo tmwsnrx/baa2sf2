@@ -1,6 +1,8 @@
-#include <cstdint>
-
 #include "AudioArchiveLoader.hpp"
+
+#include <cstdint>
+#include <utility>
+
 #include "BnkParser.hpp"
 #include "InstrumentBank.hpp"
 #include "utils.hpp"
@@ -36,8 +38,6 @@ std::optional<AudioArchive> AudioArchiveLoader::load()
 {
   reader_.stream().seekg(0);
 
-  AudioArchive archive;
-
   uint32_t marker{};
   reader_ >> marker;
 
@@ -51,7 +51,7 @@ std::optional<AudioArchive> AudioArchiveLoader::load()
   while (read_command());
 
   logger_.information("Done parsing");
-  return archive;
+  return std::move(archive_);
 }
 
 bool AudioArchiveLoader::read_command()
@@ -124,14 +124,30 @@ void AudioArchiveLoader::read_bnk(uint32_t group, uint32_t offset)
 
   BnkParser bnk_parser{group, reader_.stream(), offset, logger_};
   auto instrument_bank = bnk_parser.parse();
+
+  if (!instrument_bank.has_value())
+  {
+    logger_.error("Failed to parse IBNK");
+    return;
+  }
+
+  archive_.instrument_banks_.emplace(instrument_bank->get_id(), std::move(*instrument_bank));
 }
 
-void AudioArchiveLoader::read_wsys(uint32_t group, uint32_t offset)
+void AudioArchiveLoader::read_wsys(uint32_t bank_id, uint32_t offset)
 {
   reader_.stream().seekg(offset + sizeof(uint32_t), std::ios::beg);
 
-  WsysParser wsys_parser{group, reader_.stream(), offset, logger_};
+  WsysParser wsys_parser{bank_id, reader_.stream(), offset, logger_};
   auto wave_bank = wsys_parser.parse();
+
+  if (!wave_bank.has_value())
+  {
+    logger_.error("Failed to parse WSYS %u", bank_id);
+    return;
+  }
+
+  archive_.wave_banks_.emplace(wave_bank->get_id(), std::move(*wave_bank));
 }
 
 void AudioArchiveLoader::save_position()
