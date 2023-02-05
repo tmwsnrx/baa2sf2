@@ -52,10 +52,13 @@ std::optional<WaveBank> WsysParser::parse()
     reader_ >> group_offset;
     reader_.stream().seekg(base_offset_ + group_offset);
 
-    WaveGroup wave_group;
-    std::string filename;
-    reader_ >> filename;
-    wave_group.set_filename(std::move(filename));
+    WaveGroup wave_group{bank, num_waves};
+    
+    {
+      std::string filename;
+      std::getline(reader_.stream(), filename, '\0');
+      wave_group.set_filename(std::move(filename));
+    }
 
     for (size_t wave = 0; wave < num_waves; wave++)
     {
@@ -78,7 +81,6 @@ std::optional<WaveBank> WsysParser::parse()
       reader_ >> wave_info.loop_start;
       reader_ >> wave_info.loop_end;
 
-      reader_ >> wave_info._unknown2;
       reader_ >> wave_info.num_samples;
 
       reader_ >> wave_info._unknown3;
@@ -93,9 +95,9 @@ std::optional<WaveBank> WsysParser::parse()
       uint16_t wave_id{};
       reader_ >> wave_id;
 
-      WaveHandle wave_handle;
-      wave_handle.wave_info_ = wave_info;
+      WaveHandle wave_handle{std::move(wave_info)};
 
+      wave_group.group_entries.emplace_back(WaveGroup::Entry{.wave_id = wave_id});
       bank.wave_table_[wave_id] = wave_handle;
     }
 

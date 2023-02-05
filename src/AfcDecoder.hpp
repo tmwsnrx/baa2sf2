@@ -11,7 +11,7 @@ class AfcDecoder
 {
 public:
   void reset();
-  void decode_buffer(std::span<const uint8_t, 8> encoded_samples, std::span<int16_t, 16> destination_buffer);
+  void decode_buffer(std::span<const uint8_t, 9> encoded_samples, std::span<int16_t, 16> destination_buffer);
 
 private:
   int16_t hist_;

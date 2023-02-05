@@ -6,29 +6,24 @@ static constexpr std::array<std::array<int16_t, 2>, 16> coefficients =
   {0x0800, 0x0000},
   {0x0000, 0x0800},
   {0x0400, 0x0400},
-  {0x1000, 0xf800},
-  {0x0e00, 0xfa00},
-  {0x0c00, 0xfc00},
-  {0x1200, 0xf600},
-  {0x1068, 0xf738},
-  {0x12c0, 0xf704},
-  {0x1400, 0xf400},
-  {0x0800, 0xf800},
-  {0x0400, 0xfc00},
-  {0xfc00, 0x0400},
-  {0xfc00, 0x0000},
-  {0xf800, 0x0000}
+  {0x1000, -2048},
+  {0x0e00, -1536},
+  {0x0c00, -1024},
+  {0x1200, -2560},
+  {0x1068, -2264},
+  {0x12c0, -2300},
+  {0x1400, -3072},
+  {0x0800, -2048},
+  {0x0400, -1024},
+  {-1024, 0x0400},
+  {-1024, 0x0000},
+  {-2048, 0x0000}
 }};
 
 namespace z2sound
 {
 
-AfcDecoder::AfcDecoder()
-: hist_{}, hist2_{} {}
-
-
-
-void AfcDecoder::decode_buffer(std::span<const uint8_t, 8> encoded_samples, std::span<int16_t, 16> destination_buffer)
+void AfcDecoder::decode_buffer(std::span<const uint8_t, 9> encoded_samples, std::span<int16_t, 16> destination_buffer)
 {
   auto source = encoded_samples.begin();
   auto destination = destination_buffer.begin();
@@ -56,7 +51,7 @@ void AfcDecoder::decode_buffer(std::span<const uint8_t, 8> encoded_samples, std:
 
   for (auto& nibble : nibbles)
   {
-    int16_t sample = (delta * nibble) << 11;
+    int32_t sample = (delta * nibble) << 11;
 		sample += (hist_ * coefficients[index][0]) + (hist2_ * coefficients[index][1]);
 		sample >>= 11;
 
@@ -67,7 +62,7 @@ void AfcDecoder::decode_buffer(std::span<const uint8_t, 8> encoded_samples, std:
 			sample = -32768;
 		}
 
-		*destination++ = sample;
+		*destination++ = static_cast<int16_t>(sample);
 
 		hist2_ = hist_;
 		hist_ = sample;

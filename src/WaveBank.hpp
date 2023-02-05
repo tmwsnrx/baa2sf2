@@ -22,7 +22,7 @@ public:
   uint8_t get_id() const;
 
   const std::vector<WaveGroup> get_wave_groups() const;
-  const WaveTable& get_wave_table() const;
+  WaveTable& get_wave_table();
 
 private:
   uint8_t id_;

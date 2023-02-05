@@ -8,6 +8,7 @@ find_package(Poco REQUIRED Foundation)
 add_executable(baa2sf2
   src/main.cpp
 
+  src/AfcDecoder.cpp
   src/AudioArchiveLoader.cpp
   src/BnkParser.cpp
   src/InstrumentBank.cpp
@@ -15,7 +16,9 @@ add_executable(baa2sf2
   src/utils.cpp
   src/WaveBank.cpp
   src/WaveGroup.cpp
+  src/WaveHandle.cpp
   src/WsysParser.cpp
+  src/WavePool.cpp
 )
 
 target_link_libraries(

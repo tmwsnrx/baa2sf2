@@ -18,8 +18,7 @@ struct WaveInfo
   uint32_t loop_start;
   uint32_t loop_end;
 
-  uint16_t _unknown2;
-  uint16_t num_samples;
+  uint32_t num_samples;
 
   uint16_t _unknown3;
   uint16_t _unknown4;
