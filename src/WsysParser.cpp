@@ -77,7 +77,10 @@ std::optional<WaveBank> WsysParser::parse()
       reader_ >> wave_info.data_offset;
       reader_ >> wave_info.data_length;
 
-      reader_ >> wave_info.loop_indicator;
+      int32_t loop_indicator;
+      reader_ >> loop_indicator;
+      wave_info.is_looping = loop_indicator == -1;
+
       reader_ >> wave_info.loop_start;
       reader_ >> wave_info.loop_end;
 

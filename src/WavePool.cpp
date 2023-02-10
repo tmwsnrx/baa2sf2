@@ -61,7 +61,7 @@ void WavePool::load_group(const WaveGroup& wave_group)
 
     const auto& data = wave_buffers_.emplace_back(std::move(decoded_samples));
 
-    WaveBuffer wave_buffer{data.cbegin(), data.cend()};
+    WaveBuffer wave_buffer{data};
     wave_handle->set_buffer(wave_buffer);
   }
 }

@@ -9,12 +9,12 @@ struct WaveInfo
 {
   uint8_t codec;
   uint8_t root_key;
+  bool is_looping;
 
   float sample_rate;
   uint32_t data_offset;
   uint32_t data_length;
 
-  int32_t loop_indicator;
   uint32_t loop_start;
   uint32_t loop_end;
 
