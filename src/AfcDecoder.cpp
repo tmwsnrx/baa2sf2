@@ -10,7 +10,7 @@ static constexpr std::array<std::array<int16_t, 2>, 16> coefficients =
   {0x0e00, -1536},
   {0x0c00, -1024},
   {0x1200, -2560},
-  {0x1068, -2264},
+  {0x1068, -2248},
   {0x12c0, -2300},
   {0x1400, -3072},
   {0x0800, -2048},
@@ -52,7 +52,7 @@ void AfcDecoder::decode_buffer(std::span<const uint8_t, 9> encoded_samples, std:
   for (auto& nibble : nibbles)
   {
     int32_t sample = (delta * nibble) << 11;
-		sample += (hist_ * coefficients[index][0]) + (hist2_ * coefficients[index][1]);
+		sample += (static_cast<int32_t>(hist_) * coefficients[index][0]) + (static_cast<int32_t>(hist2_) * coefficients[index][1]);
 		sample >>= 11;
 
 		if(sample > 32767) {
@@ -65,7 +65,7 @@ void AfcDecoder::decode_buffer(std::span<const uint8_t, 9> encoded_samples, std:
 		*destination++ = static_cast<int16_t>(sample);
 
 		hist2_ = hist_;
-		hist_ = sample;
+		hist_ = static_cast<int16_t>(sample);
   }
 }
 
