@@ -16,4 +16,9 @@ uint8_t InstrumentBank::get_wave_bank_id() const
   return wave_bank_id_;
 }
 
+const std::vector<std::unique_ptr<Instrument>>& InstrumentBank::get_instruments() const
+{
+  return instruments_;
+}
+
 }

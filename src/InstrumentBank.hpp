@@ -42,6 +42,8 @@ public:
   uint8_t get_id() const;
   uint8_t get_wave_bank_id() const;
 
+  const std::vector<std::unique_ptr<Instrument>>& get_instruments() const;
+
 private:
   uint8_t id_;
   uint8_t wave_bank_id_;
