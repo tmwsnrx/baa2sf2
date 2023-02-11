@@ -15,6 +15,7 @@ public:
   struct Entry
   {
     uint16_t wave_id;
+    uint32_t data_offset;
   };
 
   WaveGroup(WaveBank& wave_bank, size_t num_entries);

@@ -73,8 +73,9 @@ std::optional<WaveBank> WsysParser::parse()
       reader_ >> wave_info.root_key;
       reader_.stream().seekg(1, std::ios::cur);
 
+      uint32_t data_offset{};
       reader_ >> wave_info.sample_rate;
-      reader_ >> wave_info.data_offset;
+      reader_ >> data_offset;
       reader_ >> wave_info.data_length;
 
       int32_t loop_indicator;
@@ -100,8 +101,15 @@ std::optional<WaveBank> WsysParser::parse()
 
       WaveHandle wave_handle{std::move(wave_info)};
 
-      wave_group.group_entries.emplace_back(WaveGroup::Entry{.wave_id = wave_id});
-      bank.wave_table_[wave_id] = wave_handle;
+      wave_group.group_entries.emplace_back(WaveGroup::Entry{
+        .wave_id = wave_id,
+        .data_offset = data_offset
+      });
+
+      if (!bank.wave_table_[wave_id].has_value())
+      {
+        bank.wave_table_[wave_id] = wave_handle;
+      }
     }
 
     bank.wave_groups_.emplace_back(wave_group);

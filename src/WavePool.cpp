@@ -33,7 +33,7 @@ void WavePool::load_group(const WaveGroup& wave_group)
     auto& wave_handle = wave_bank_.wave_table_[entry.wave_id];
     const auto& wave_info = wave_handle->get_wave_info();
 
-    wave_archive.seekg(wave_info.data_offset);
+    wave_archive.seekg(entry.data_offset);
 
     const size_t num_buffers = wave_info.data_length / 9;
 

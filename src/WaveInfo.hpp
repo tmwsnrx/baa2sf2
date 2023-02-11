@@ -12,7 +12,6 @@ struct WaveInfo
   bool is_looping;
 
   float sample_rate;
-  uint32_t data_offset;
   uint32_t data_length;
 
   uint32_t loop_start;
