@@ -143,7 +143,7 @@ static constexpr int16_t volume_to_attenuation(float volume_multiplier)
     return 0;
   }
   
-  return -100.0f * std::log10(volume_multiplier);
+  return static_cast<int16_t>(std::round(1000.0f * std::log10(volume_multiplier)));
 }
 
 static constexpr Tuning pitch_to_tuning(float pitch_multiplier)
