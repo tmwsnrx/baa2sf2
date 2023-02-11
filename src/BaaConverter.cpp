@@ -1,5 +1,6 @@
 #include "BaaConverter.hpp"
 
+#include <cmath>
 #include <iomanip>
 #include <memory>
 #include <sstream>
@@ -7,6 +8,15 @@
 #include <vector>
 
 using namespace sf2cute;
+
+struct Tuning
+{
+  int16_t coarse;
+  int16_t fine;
+};
+
+static constexpr int16_t volume_to_attenuation(float volume_multiplier);
+static constexpr Tuning pitch_to_tuning(float pitch_multiplier);
 
 BaaConverter::BaaConverter(z2sound::AudioArchive& audio_archive)
 : audio_archive_{audio_archive} {}
@@ -50,12 +60,18 @@ std::optional<SoundFont> BaaConverter::to_sf2(uint8_t instrument_bank_no)
         continue;
       }
 
-      sf2cute::SFInstrumentZone instrument_zone{
+      auto attenuation = volume_to_attenuation(key_zone.volume_multiplier);
+      auto tuning = pitch_to_tuning(key_zone.pitch_multiplier);
+
+      SFInstrumentZone instrument_zone{
         *sample,
         std::vector {
-          sf2cute::SFGeneratorItem(sf2cute::SFGenerator::kKeyRange, sf2cute::RangesType(key_zone.lower_key_limit, key_zone.upper_key_limit))
+          SFGeneratorItem{SFGenerator::kKeyRange, RangesType{key_zone.lower_key_limit, key_zone.upper_key_limit}},
+          SFGeneratorItem{SFGenerator::kInitialAttenuation, GenAmountType{attenuation}},
+          SFGeneratorItem{SFGenerator::kCoarseTune, GenAmountType{tuning.coarse}},
+          SFGeneratorItem{SFGenerator::kFineTune, GenAmountType{tuning.fine}}
         },
-        std::vector<sf2cute::SFModulatorItem>{}
+        std::vector<SFModulatorItem>{}
       };
 
       sf2instrument->AddZone(std::move(instrument_zone));
@@ -114,4 +130,39 @@ std::optional<std::shared_ptr<SFSample>> BaaConverter::fetch_sample(const z2soun
   }
 
   return sample_iter->second;
+}
+
+static constexpr int16_t volume_to_attenuation(float volume_multiplier)
+{
+  if (volume_multiplier <= 0.0f)
+  {
+    return 1440;
+  }
+  else if (volume_multiplier >= 1.0f)
+  {
+    return 0;
+  }
+  
+  return -100.0f * std::log10(volume_multiplier);
+}
+
+static constexpr Tuning pitch_to_tuning(float pitch_multiplier)
+{
+  if (pitch_multiplier == 1.0f)
+  {
+    return Tuning{
+      .coarse = 0,
+      .fine = 0
+    };
+  }
+
+  auto cents = 1200.0f * std::log2(pitch_multiplier);
+  int16_t semitones = static_cast<int16_t>(cents / 100);
+
+  cents -= semitones * 100;
+
+  return Tuning{
+    .coarse = semitones,
+    .fine = static_cast<int16_t>(std::round(cents))
+  };
 }
