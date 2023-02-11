@@ -73,7 +73,8 @@
         "bitset": "cpp",
         "complex": "cpp",
         "typeindex": "cpp",
-        "cfenv": "cpp"
+        "cfenv": "cpp",
+        "span": "cpp"
     },
     "cmake.sourceDirectory": "${workspaceFolder}/."
 }

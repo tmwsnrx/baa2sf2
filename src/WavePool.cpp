@@ -30,7 +30,7 @@ void WavePool::load_group(const WaveGroup& wave_group)
 
   for (auto& entry : wave_group.group_entries)
   {
-    auto& wave_handle = wave_bank_.get_wave_table()[entry.wave_id];
+    auto& wave_handle = wave_bank_.wave_table_[entry.wave_id];
     const auto& wave_info = wave_handle->get_wave_info();
 
     wave_archive.seekg(wave_info.data_offset);

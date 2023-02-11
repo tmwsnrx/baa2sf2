@@ -12,6 +12,7 @@ namespace z2sound
 class AudioArchive
 {
 friend class AudioArchiveLoader;
+friend class WavePool;
 
 public:
   std::map<uint8_t, WaveBank> wave_banks_;

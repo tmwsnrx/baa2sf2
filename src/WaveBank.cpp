@@ -16,7 +16,7 @@ const std::vector<WaveGroup> WaveBank::get_wave_groups() const
   return wave_groups_;
 }
 
-WaveBank::WaveTable& WaveBank::get_wave_table()
+const WaveBank::WaveTable& WaveBank::get_wave_table() const
 {
   return wave_table_;
 }

@@ -12,6 +12,7 @@ add_executable(baa2sf2
 
   src/AfcDecoder.cpp
   src/AudioArchiveLoader.cpp
+  src/BaaConverter.cpp
   src/BasicInstrument.cpp
   src/BnkParser.cpp
   src/InstrumentBank.cpp

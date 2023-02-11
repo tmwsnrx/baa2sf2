@@ -1,10 +1,14 @@
+#include <cassert>
 #include <fstream>
 #include <iostream>
+#include <map>
+#include <vector>
 
 #include "Poco/ConsoleChannel.h"
 #include "Poco/Logger.h"
 
 #include "AudioArchiveLoader.hpp"
+#include "BaaConverter.hpp"
 #include "WavePool.hpp"
 
 Poco::Logger& create_logger();
@@ -34,8 +38,28 @@ int main(int, char**)
 
   for (auto& group : bgm_bank_iterator->second.get_wave_groups())
   {
+    logger.information("Loading %s", group.get_filename());
     wave_pool.load_group(group);
   }
+
+  logger.information("Finished loading wave groups");
+
+  const uint8_t bank_no = 11;
+
+  BaaConverter baa_converter{*audio_archive};
+  auto sf2 = baa_converter.to_sf2(bank_no);
+
+  if (!sf2.has_value())
+  {
+    logger.error("Failed converting bank %u to SoundFont", static_cast<unsigned>(bank_no));
+    return -1;
+  }
+
+  auto filename = "TP_Bank_" + std::to_string(bank_no) + ".sf2";
+
+  std::ofstream sf2_file{filename, std::ios::binary};
+  sf2->Write(sf2_file);
+  logger.information("Finished writing " + filename);
 }
 
 Poco::Logger& create_logger()
