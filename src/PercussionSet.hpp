@@ -28,6 +28,7 @@ public:
 
   void set_entry(Key key, PercussionEntry entry);
 
+  virtual Instrument::Type get_type() const override;
   virtual std::vector<Instrument::KeyZone> get_key_zones() const override;
 
 private:

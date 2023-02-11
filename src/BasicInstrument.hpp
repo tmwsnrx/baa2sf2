@@ -15,6 +15,7 @@ class BasicInstrument : public Instrument
 friend class BnkParser;
 
 public:
+  virtual Instrument::Type get_type() const override;
   virtual std::vector<Instrument::KeyZone> get_key_zones() const override;
 
 private:
