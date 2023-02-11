@@ -17,6 +17,7 @@ struct Tuning
 
 static constexpr int16_t volume_to_attenuation(float volume_multiplier);
 static constexpr Tuning pitch_to_tuning(float pitch_multiplier);
+static constexpr int16_t pan_float_to_promille(float pan);
 
 BaaConverter::BaaConverter(z2sound::AudioArchive& audio_archive)
 : audio_archive_{audio_archive} {}
@@ -62,6 +63,7 @@ std::optional<SoundFont> BaaConverter::to_sf2(uint8_t instrument_bank_no)
 
       auto attenuation = volume_to_attenuation(key_zone.volume_multiplier);
       auto tuning = pitch_to_tuning(key_zone.pitch_multiplier);
+      auto pan = pan_float_to_promille(key_zone.pan);
 
       SFInstrumentZone instrument_zone{
         *sample,
@@ -69,10 +71,16 @@ std::optional<SoundFont> BaaConverter::to_sf2(uint8_t instrument_bank_no)
           SFGeneratorItem{SFGenerator::kKeyRange, RangesType{key_zone.lower_key_limit, key_zone.upper_key_limit}},
           SFGeneratorItem{SFGenerator::kInitialAttenuation, GenAmountType{attenuation}},
           SFGeneratorItem{SFGenerator::kCoarseTune, GenAmountType{tuning.coarse}},
-          SFGeneratorItem{SFGenerator::kFineTune, GenAmountType{tuning.fine}}
+          SFGeneratorItem{SFGenerator::kFineTune, GenAmountType{tuning.fine}},
+          SFGeneratorItem{SFGenerator::kPan, GenAmountType{pan}}
         },
         std::vector<SFModulatorItem>{}
       };
+
+      if (instrument->get_type() == z2sound::Instrument::Type::Percussion)
+      {
+        instrument_zone.SetGenerator(SFGeneratorItem{SFGenerator::kOverridingRootKey, GenAmountType{key_zone.lower_key_limit}});
+      }
 
       sf2instrument->AddZone(std::move(instrument_zone));
     }
@@ -113,7 +121,7 @@ std::optional<std::shared_ptr<SFSample>> BaaConverter::fetch_sample(const z2soun
     sample_buffer.assign(wave_buffer->begin(), wave_buffer->end());
 
     std::stringstream sample_name;
-    sample_name << "Sample_" << std::setfill('0') << std::setw(4) << wave_id;
+    sample_name << "Sample_" << std::setfill('0') << std::setw(4) << std::hex << wave_id;
     
     auto sample = sf2_.NewSample(
       sample_name.str(),
@@ -156,13 +164,26 @@ static constexpr Tuning pitch_to_tuning(float pitch_multiplier)
     };
   }
 
-  auto cents = 1200.0f * std::log2(pitch_multiplier);
-  int16_t semitones = static_cast<int16_t>(cents / 100);
-
-  cents -= semitones * 100;
+  int32_t cents_total = static_cast<int32_t>(std::round(1200.0f * std::log2(pitch_multiplier)));
+  int16_t semitones = static_cast<int16_t>(cents_total / 100);
+  int16_t fine = cents_total - semitones * 100;
 
   return Tuning{
     .coarse = semitones,
-    .fine = static_cast<int16_t>(std::round(cents))
+    .fine = fine
   };
+}
+
+static constexpr int16_t pan_float_to_promille(float pan)
+{
+  if (pan <= -1.0f)
+  {
+    return -500;
+  }
+  else if (pan >= 1.0f)
+  {
+    return 500;
+  }
+
+  return static_cast<int16_t>(std::round(pan * 500.0f));
 }
