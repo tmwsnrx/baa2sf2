@@ -24,6 +24,7 @@ std::vector<Instrument::KeyZone> BasicInstrument::get_key_zones() const
     };
 
     key_zones.emplace_back(std::move(key_zone));
+    lower_key = key_region.upper_key_limit + 1;
   }
 
   return key_zones;
