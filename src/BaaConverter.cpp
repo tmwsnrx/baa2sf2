@@ -72,7 +72,8 @@ std::optional<SoundFont> BaaConverter::to_sf2(uint8_t instrument_bank_no)
           SFGeneratorItem{SFGenerator::kInitialAttenuation, GenAmountType{attenuation}},
           SFGeneratorItem{SFGenerator::kCoarseTune, GenAmountType{tuning.coarse}},
           SFGeneratorItem{SFGenerator::kFineTune, GenAmountType{tuning.fine}},
-          SFGeneratorItem{SFGenerator::kPan, GenAmountType{pan}}
+          SFGeneratorItem{SFGenerator::kPan, GenAmountType{pan}},
+          SFGeneratorItem{SFGenerator::kSampleModes, static_cast<uint16_t>(SampleMode::kLoopContinuously)}
         },
         std::vector<SFModulatorItem>{}
       };
