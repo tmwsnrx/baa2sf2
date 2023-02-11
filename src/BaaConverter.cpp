@@ -49,6 +49,12 @@ std::optional<SoundFont> BaaConverter::to_sf2(uint8_t instrument_bank_no)
 
   for (size_t instrument_no = 0; const auto& instrument : instruments)
   {
+    if (!instrument)
+    {
+      instrument_no++;
+      continue;
+    }
+
     auto name = std::to_string(instrument_no);
 
     auto sf2instrument = sf2_.NewInstrument("Instrument_" + name);
@@ -72,8 +78,7 @@ std::optional<SoundFont> BaaConverter::to_sf2(uint8_t instrument_bank_no)
           SFGeneratorItem{SFGenerator::kInitialAttenuation, GenAmountType{attenuation}},
           SFGeneratorItem{SFGenerator::kCoarseTune, GenAmountType{tuning.coarse}},
           SFGeneratorItem{SFGenerator::kFineTune, GenAmountType{tuning.fine}},
-          SFGeneratorItem{SFGenerator::kPan, GenAmountType{pan}},
-          SFGeneratorItem{SFGenerator::kSampleModes, static_cast<uint16_t>(SampleMode::kLoopContinuously)}
+          SFGeneratorItem{SFGenerator::kPan, GenAmountType{pan}}
         },
         std::vector<SFModulatorItem>{}
       };
@@ -81,6 +86,13 @@ std::optional<SoundFont> BaaConverter::to_sf2(uint8_t instrument_bank_no)
       if (instrument->get_type() == z2sound::Instrument::Type::Percussion)
       {
         instrument_zone.SetGenerator(SFGeneratorItem{SFGenerator::kOverridingRootKey, GenAmountType{key_zone.lower_key_limit}});
+      }
+
+      if (!(sample->get()->start_loop() == 0 && sample->get()->end_loop() == 0))
+      {
+        instrument_zone.SetGenerator(
+          SFGeneratorItem{SFGenerator::kSampleModes, static_cast<uint16_t>(SampleMode::kLoopContinuously)}
+        );
       }
 
       sf2instrument->AddZone(std::move(instrument_zone));
