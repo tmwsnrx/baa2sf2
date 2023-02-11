@@ -79,7 +79,7 @@ std::optional<InstrumentBank> BnkParser::parse()
 
   for (size_t envelope_index = 0; envelope_index < num_envelopes; envelope_index++)
   {
-    InstrumentBank::Envelope envelope;
+    Envelope envelope;
     reader_ >> envelope.curve_type;
     reader_ >> envelope.time;
     reader_ >> envelope.volume;
@@ -92,7 +92,7 @@ std::optional<InstrumentBank> BnkParser::parse()
   reader_ >> num_oscillators;
   for (size_t oscillator_index = 0; oscillator_index < num_oscillators; oscillator_index++)
   {
-    InstrumentBank::OscillatorConfig osci;
+    Oscillator osci;
     reader_.stream().seekg(sizeof(uint32_t), std::ios::cur);
 
     reader_ >> osci.b1;

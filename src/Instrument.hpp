@@ -1,7 +1,10 @@
 #pragma once
 
+#include <optional>
+#include <utility>
 #include <vector>
 
+#include "Oscillator.hpp"
 #include "types.hpp"
 
 namespace z2sound
@@ -24,6 +27,9 @@ public:
     float volume_multiplier;
     float pitch_multiplier;
     float pan;
+
+    std::optional<std::reference_wrapper<const Oscillator>> oscillator;
+    uint16_t release;
   };
 
   virtual ~Instrument() = default;

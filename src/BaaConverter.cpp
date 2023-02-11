@@ -7,6 +7,8 @@
 #include <string>
 #include <vector>
 
+#include "Adsr.hpp"
+
 using namespace sf2cute;
 
 struct Tuning
@@ -71,6 +73,13 @@ std::optional<SoundFont> BaaConverter::to_sf2(uint8_t instrument_bank_no)
       auto tuning = pitch_to_tuning(key_zone.pitch_multiplier);
       auto pan = pan_float_to_promille(key_zone.pan);
 
+      Adsr adsr;
+
+      if (key_zone.release != 0)
+      {
+        adsr = Adsr::from_percussion_release(key_zone.release);
+      }
+
       SFInstrumentZone instrument_zone{
         *sample,
         std::vector {
@@ -78,7 +87,11 @@ std::optional<SoundFont> BaaConverter::to_sf2(uint8_t instrument_bank_no)
           SFGeneratorItem{SFGenerator::kInitialAttenuation, GenAmountType{attenuation}},
           SFGeneratorItem{SFGenerator::kCoarseTune, GenAmountType{tuning.coarse}},
           SFGeneratorItem{SFGenerator::kFineTune, GenAmountType{tuning.fine}},
-          SFGeneratorItem{SFGenerator::kPan, GenAmountType{pan}}
+          SFGeneratorItem{SFGenerator::kPan, GenAmountType{pan}},
+          SFGeneratorItem{SFGenerator::kAttackVolEnv, GenAmountType{adsr.attack_time}},
+          SFGeneratorItem{SFGenerator::kDecayVolEnv, GenAmountType{adsr.decay_time}},
+          SFGeneratorItem{SFGenerator::kSustainVolEnv, GenAmountType{adsr.sustain_attenuation}},
+          SFGeneratorItem{SFGenerator::kReleaseVolEnv, GenAmountType{adsr.release_time}}
         },
         std::vector<SFModulatorItem>{}
       };

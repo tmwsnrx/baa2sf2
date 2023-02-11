@@ -27,7 +27,10 @@ std::vector<Instrument::KeyZone> PercussionSet::get_key_zones() const
       .wave_id = percussion_entry.sample_id,
       .volume_multiplier = percussion_entry.volume_multiplier * percussion_entry.volume_multiplier_2,
       .pitch_multiplier = percussion_entry.pitch_multiplier * percussion_entry.pitch_multiplier_2,
-      .pan = to_float_pan(percussion_entry.pan)
+      .pan = to_float_pan(percussion_entry.pan),
+
+      .oscillator = std::nullopt,
+      .release = percussion_entry.release
     };
 
     key_zones.emplace_back(std::move(key_zone));

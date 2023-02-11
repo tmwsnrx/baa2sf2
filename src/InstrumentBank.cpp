@@ -21,4 +21,9 @@ const std::vector<std::unique_ptr<Instrument>>& InstrumentBank::get_instruments(
   return instruments_;
 }
 
+const std::vector<Oscillator>& InstrumentBank::get_oscillators() const
+{
+  return oscillators_;
+}
+
 }

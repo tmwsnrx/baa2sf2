@@ -10,6 +10,7 @@ add_subdirectory(sf2cute)
 add_executable(baa2sf2
   src/main.cpp
 
+  src/Adsr.cpp
   src/AfcDecoder.cpp
   src/AudioArchiveLoader.cpp
   src/BaaConverter.cpp

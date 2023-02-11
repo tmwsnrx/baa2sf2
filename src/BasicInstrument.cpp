@@ -20,7 +20,10 @@ std::vector<Instrument::KeyZone> BasicInstrument::get_key_zones() const
       .wave_id = key_region.sample_id,
       .volume_multiplier = key_region.volume_multiplier * volume_multiplier_,
       .pitch_multiplier = key_region.pitch_multiplier * pitch_multiplier_,
-      .pan = 0.0f
+      .pan = 0.0f,
+
+      .oscillator = std::nullopt,
+      .release = 0
     };
 
     key_zones.emplace_back(std::move(key_zone));
