@@ -5,10 +5,13 @@
 #include <vector>
 
 #include "Instrument.hpp"
+#include "Oscillator.hpp"
 #include "types.hpp"
 
 namespace z2sound
 {
+
+  class InstrumentBank;
 
 class BasicInstrument : public Instrument
 {
@@ -27,6 +30,7 @@ private:
     Multiplier pitch_multiplier;
   };
 
+  Oscillator oscillator_;
   std::vector<size_t> oscillator_indices_;
   std::vector<KeyRegion> key_regions_;
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "InstrumentBank.hpp"
+#include "Oscillator.hpp"
 
 struct Adsr
 {
@@ -9,6 +9,6 @@ struct Adsr
   int16_t sustain_attenuation;
   int16_t release_time;
 
-  static Adsr from_oscillator(const z2sound::Oscillator& oscillator, const z2sound::InstrumentBank& bank);
+  static Adsr from_oscillator(const z2sound::Oscillator& oscillator);
   static Adsr from_percussion_release(uint16_t release);
 };

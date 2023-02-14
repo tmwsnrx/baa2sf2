@@ -32,7 +32,9 @@ int main(int, char**)
     std::cout << "Failed to load audio archive" << std::endl;
   }
 
-  auto bgm_bank_iterator = audio_archive->wave_banks_.find(1);
+  const uint8_t wave_bank_no = 1;
+
+  auto bgm_bank_iterator = audio_archive->wave_banks_.find(wave_bank_no);
   z2sound::WavePool wave_pool{bgm_bank_iterator->second};
   wave_pool.set_base_directory("/home/tim/roms/TP/files/Audiores/Waves");
 
@@ -44,22 +46,29 @@ int main(int, char**)
 
   logger.information("Finished loading wave groups");
 
-  const uint8_t bank_no = 11;
-
-  BaaConverter baa_converter{*audio_archive};
-  auto sf2 = baa_converter.to_sf2(bank_no);
-
-  if (!sf2.has_value())
+  for (const auto& bank : audio_archive->instrument_banks_)
   {
-    logger.error("Failed converting bank %u to SoundFont", static_cast<unsigned>(bank_no));
-    return -1;
+    if (bank.second.get_wave_bank_id() != wave_bank_no)
+    {
+      continue;
+    }
+
+    BaaConverter baa_converter{*audio_archive};
+    uint8_t bank_id = bank.second.get_id();
+    auto sf2 = baa_converter.to_sf2(bank_id);
+
+    if (!sf2.has_value())
+    {
+      logger.error("Failed converting bank %u to SoundFont", static_cast<unsigned>(bank_id));
+      return -1;
+    }
+
+    auto filename = "TP_Bank_" + std::to_string(bank_id) + ".sf2";
+
+    std::ofstream sf2_file{filename, std::ios::binary};
+    sf2->Write(sf2_file);
+    logger.information("Finished writing " + filename);
   }
-
-  auto filename = "TP_Bank_" + std::to_string(bank_no) + ".sf2";
-
-  std::ofstream sf2_file{filename, std::ios::binary};
-  sf2->Write(sf2_file);
-  logger.information("Finished writing " + filename);
 }
 
 Poco::Logger& create_logger()

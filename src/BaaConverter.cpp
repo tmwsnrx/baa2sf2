@@ -1,6 +1,5 @@
 #include "BaaConverter.hpp"
 
-#include <cmath>
 #include <iomanip>
 #include <memory>
 #include <sstream>
@@ -8,18 +7,9 @@
 #include <vector>
 
 #include "Adsr.hpp"
+#include "UnitConversions.hpp"
 
 using namespace sf2cute;
-
-struct Tuning
-{
-  int16_t coarse;
-  int16_t fine;
-};
-
-static constexpr int16_t volume_to_attenuation(float volume_multiplier);
-static constexpr Tuning pitch_to_tuning(float pitch_multiplier);
-static constexpr int16_t pan_float_to_promille(float pan);
 
 BaaConverter::BaaConverter(z2sound::AudioArchive& audio_archive)
 : audio_archive_{audio_archive} {}
@@ -28,6 +18,9 @@ std::optional<SoundFont> BaaConverter::to_sf2(uint8_t instrument_bank_no)
 {
   sf2_ = SoundFont{};
   samples_.clear();
+
+  sf2_.set_comment("WIP version");
+  sf2_.set_bank_name("TP Bank" + std::to_string(instrument_bank_no));
 
   const auto& baa = audio_archive_.get();
 
@@ -75,7 +68,11 @@ std::optional<SoundFont> BaaConverter::to_sf2(uint8_t instrument_bank_no)
 
       Adsr adsr;
 
-      if (key_zone.release != 0)
+      if (key_zone.oscillator.has_value())
+      {
+        adsr = Adsr::from_oscillator(*key_zone.oscillator);
+      }
+      else if (key_zone.release != 0)
       {
         adsr = Adsr::from_percussion_release(key_zone.release);
       }
@@ -164,52 +161,4 @@ std::optional<std::shared_ptr<SFSample>> BaaConverter::fetch_sample(const z2soun
   }
 
   return sample_iter->second;
-}
-
-static constexpr int16_t volume_to_attenuation(float volume_multiplier)
-{
-  if (volume_multiplier <= 0.0f)
-  {
-    return 1440;
-  }
-  else if (volume_multiplier >= 1.0f)
-  {
-    return 0;
-  }
-  
-  return static_cast<int16_t>(std::round(1000.0f * std::log10(volume_multiplier)));
-}
-
-static constexpr Tuning pitch_to_tuning(float pitch_multiplier)
-{
-  if (pitch_multiplier == 1.0f)
-  {
-    return Tuning{
-      .coarse = 0,
-      .fine = 0
-    };
-  }
-
-  int32_t cents_total = static_cast<int32_t>(std::round(1200.0f * std::log2(pitch_multiplier)));
-  int16_t semitones = static_cast<int16_t>(cents_total / 100);
-  int16_t fine = cents_total - semitones * 100;
-
-  return Tuning{
-    .coarse = semitones,
-    .fine = fine
-  };
-}
-
-static constexpr int16_t pan_float_to_promille(float pan)
-{
-  if (pan <= -1.0f)
-  {
-    return -500;
-  }
-  else if (pan >= 1.0f)
-  {
-    return 500;
-  }
-
-  return static_cast<int16_t>(std::round(pan * 500.0f));
 }

@@ -143,7 +143,7 @@ std::optional<InstrumentBank> BnkParser::parse()
 
     if (marker == MARKER_INST_ENTRY)
     {
-      auto instrument = parse_inst();
+      auto instrument = parse_inst(bank.oscillators_);
       bank.instruments_.emplace_back(std::make_unique<BasicInstrument>(instrument));
     }
     else if (marker == MARKER_PERC_ENTRY)
@@ -200,7 +200,7 @@ void BnkParser::report_missing_chunk(uint32_t marker)
   logger_.error("BNK is missing %s chunk, which is mandatory", marker_to_string(marker));
 }
 
-BasicInstrument BnkParser::parse_inst()
+BasicInstrument BnkParser::parse_inst(const std::vector<Oscillator>& oscillators)
 {
   BasicInstrument instrument;
 
@@ -213,6 +213,8 @@ BasicInstrument BnkParser::parse_inst()
     reader_ >> osc_index;
     instrument.oscillator_indices_.push_back(osc_index);
   }
+
+  instrument.oscillator_ = oscillators.at(instrument.oscillator_indices_[0]);
 
   uint32_t unknown_count{};
   reader_ >> unknown_count;

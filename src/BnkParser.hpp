@@ -33,7 +33,7 @@ private:
   std::optional<std::reference_wrapper<const ChunkInfo>> get_chunk_info(uint32_t marker) const;
   void report_missing_chunk(uint32_t marker);
 
-  BasicInstrument parse_inst();
+  BasicInstrument parse_inst(const std::vector<Oscillator>& oscillators);
   PercussionSet parse_perc();
 
   uint8_t wave_bank_id_;

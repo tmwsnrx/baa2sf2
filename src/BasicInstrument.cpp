@@ -22,7 +22,7 @@ std::vector<Instrument::KeyZone> BasicInstrument::get_key_zones() const
       .pitch_multiplier = key_region.pitch_multiplier * pitch_multiplier_,
       .pan = 0.0f,
 
-      .oscillator = std::nullopt,
+      .oscillator = oscillator_,
       .release = 0
     };
 
