@@ -46,29 +46,44 @@ int main(int, char**)
 
   logger.information("Finished loading wave groups");
 
-  for (const auto& bank : audio_archive->instrument_banks_)
+  BaaConverter baa_converter{*audio_archive};
+  auto sf2 = baa_converter.to_sf2(wave_bank_no);
+
+  if (!sf2.has_value())
   {
-    if (bank.second.get_wave_bank_id() != wave_bank_no)
-    {
-      continue;
-    }
-
-    BaaConverter baa_converter{*audio_archive};
-    uint8_t bank_id = bank.second.get_id();
-    auto sf2 = baa_converter.to_sf2(bank_id);
-
-    if (!sf2.has_value())
-    {
-      logger.error("Failed converting bank %u to SoundFont", static_cast<unsigned>(bank_id));
-      return -1;
-    }
-
-    auto filename = "TP_Bank_" + std::to_string(bank_id) + ".sf2";
-
-    std::ofstream sf2_file{filename, std::ios::binary};
-    sf2->Write(sf2_file);
-    logger.information("Finished writing " + filename);
+    logger.error("Failed converting wave bank %u to SoundFont", static_cast<unsigned>(wave_bank_no));
+    return -1;
   }
+
+  auto filename = "TP_Bank_" + std::to_string(wave_bank_no) + ".sf2";
+
+  std::ofstream sf2_file{filename, std::ios::binary};
+  sf2->Write(sf2_file);
+  logger.information("Finished writing " + filename);
+
+  // for (const auto& bank : audio_archive->instrument_banks_)
+  // {
+  //   if (bank.second.get_wave_bank_id() != wave_bank_no)
+  //   {
+  //     continue;
+  //   }
+
+  //   BaaConverter baa_converter{*audio_archive};
+  //   uint8_t bank_id = bank.second.get_id();
+  //   auto sf2 = baa_converter.to_sf2(bank_id);
+
+  //   if (!sf2.has_value())
+  //   {
+  //     logger.error("Failed converting bank %u to SoundFont", static_cast<unsigned>(bank_id));
+  //     return -1;
+  //   }
+
+  //   auto filename = "TP_Bank_" + std::to_string(bank_id) + ".sf2";
+
+  //   std::ofstream sf2_file{filename, std::ios::binary};
+  //   sf2->Write(sf2_file);
+  //   logger.information("Finished writing " + filename);
+  // }
 }
 
 Poco::Logger& create_logger()

@@ -13,7 +13,7 @@ class BaaConverter
 public:
   explicit BaaConverter(z2sound::AudioArchive& audio_archive);
 
-  std::optional<sf2cute::SoundFont> to_sf2(uint8_t instrument_bank_no);
+  std::optional<sf2cute::SoundFont> to_sf2(uint8_t wave_bank_no);
 
 private:
   std::optional<std::shared_ptr<sf2cute::SFSample>> fetch_sample(const z2sound::WaveBank& wave_bank, uint16_t wave_id);

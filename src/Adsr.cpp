@@ -47,7 +47,7 @@ Adsr Adsr::from_oscillator(const z2sound::Oscillator& oscillator)
   //       }
   //       else if (phase == EnvelopePhase::Decay)
   //       {
-  //         adsr.decay_time = milliseconds_to_timescents(envelope_iter->time);
+  //         adsr.decay_time = milliseconds_to_timescents(envelope_iter->time * 3);
   //         adsr.sustain_attenuation = volume_to_attenuation(envelope_iter->volume);
   //       }
   //       break;
@@ -74,7 +74,7 @@ Adsr Adsr::from_oscillator(const z2sound::Oscillator& oscillator)
       default:
         if (phase == EnvelopePhase::Release)
         {
-          adsr.release_time = milliseconds_to_timescents(envelope_iter->time);
+          adsr.release_time = milliseconds_to_timescents(envelope_iter->time * 3);
         }
         break;
       }
