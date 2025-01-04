@@ -1,7 +1,5 @@
-#include <cassert>
 #include <fstream>
 #include <iostream>
-#include <map>
 #include <vector>
 
 #include "Poco/ConsoleChannel.h"
@@ -11,64 +9,96 @@
 #include "BaaConverter.hpp"
 #include "WavePool.hpp"
 
-Poco::Logger& create_logger();
+Poco::Logger &
+create_logger();
 
-int main(int, char**)
+int
+main(int argc, char **argv)
 {
-  Poco::Logger& logger = create_logger();
+    if (argc != 4)
+    {
+        std::cout << "Usage: " << argv[0] << " <*.baa> <wave folder> <output folder>" << std::endl;
+        return -1;
+    }
 
-  std::ifstream sound_file{"Z2Sound.baa", std::ios::in | std::ios::binary};
+    std::filesystem::path baaPath = argv[1];
+    std::string waveFolder = argv[2];
+    std::filesystem::path outputFolder{argv[3]};
 
-  if (!sound_file)
-  {
-    std::cout << "Could not open Z2Sound.baa" << std::endl;
-  }
+    Poco::Logger &logger = create_logger();
 
-  z2sound::AudioArchiveLoader loader{sound_file, logger};
-  auto audio_archive = loader.load();
+    std::ifstream sound_file{baaPath, std::ios::in | std::ios::binary};
 
-  if (!audio_archive)
-  {
-    std::cout << "Failed to load audio archive" << std::endl;
-  }
+    if (!sound_file)
+    {
+        logger.error("Could not open %s", baaPath.string());
+    }
 
-  auto bgm_bank_iterator = audio_archive->wave_banks_.find(1);
-  z2sound::WavePool wave_pool{bgm_bank_iterator->second};
-  wave_pool.set_base_directory("/home/tim/roms/TP/files/Audiores/Waves");
+    z2sound::AudioArchiveLoader loader{sound_file, logger};
+    auto audio_archive = loader.load();
 
-  for (auto& group : bgm_bank_iterator->second.get_wave_groups())
-  {
-    logger.information("Loading %s", group.get_filename());
-    wave_pool.load_group(group);
-  }
+    if (!audio_archive)
+    {
+        logger.error("Failed to load audio archive");
+    }
 
-  logger.information("Finished loading wave groups");
+    logger.information("Archive has %u wave banks", static_cast<unsigned>(audio_archive->wave_banks_.size()));
 
-  const uint8_t bank_no = 11;
+    for (auto &[wave_bank_id, wave_bank] : audio_archive->wave_banks_)
+    {
+        logger.information("Wave bank %u has %u wave groups",
+                           static_cast<unsigned>(wave_bank_id),
+                           static_cast<unsigned>(wave_bank.get_wave_groups().size()));
 
-  BaaConverter baa_converter{*audio_archive};
-  auto sf2 = baa_converter.to_sf2(bank_no);
+        z2sound::WavePool wave_pool{wave_bank};
+        wave_pool.set_base_directory(waveFolder);
 
-  if (!sf2.has_value())
-  {
-    logger.error("Failed converting bank %u to SoundFont", static_cast<unsigned>(bank_no));
-    return -1;
-  }
+        for (auto &group : wave_bank.get_wave_groups())
+        {
+            logger.information("Decoding %s", group.get_filename());
+            wave_pool.load_group(group);
+        }
 
-  auto filename = "TP_Bank_" + std::to_string(bank_no) + ".sf2";
+        logger.information("Finished loading wave groups");
 
-  std::ofstream sf2_file{filename, std::ios::binary};
-  sf2->Write(sf2_file);
-  logger.information("Finished writing " + filename);
+        BaaConverter baa_converter{*audio_archive};
+
+        logger.information("Converting wave bank %u to SoundFont...", static_cast<unsigned>(wave_bank_id));
+        auto sf2 = baa_converter.to_sf2(wave_bank_id);
+
+        if (!sf2.has_value())
+        {
+            logger.error("Failed converting wave bank %u to SoundFont", static_cast<unsigned>(wave_bank_id));
+            return -1;
+        }
+
+        logger.information("Done.");
+
+        std::ostringstream filename_stream;
+        filename_stream << baaPath.stem().string() << "_" << std::to_string(wave_bank_id) << ".sf2";
+        std::filesystem::path outputFile = outputFolder / filename_stream.str();
+
+        std::ofstream sf2_file{outputFile, std::ios::binary};
+
+        if (!sf2_file)
+        {
+            logger.error("Could not open output file %s for writing", outputFile.string());
+            return -1;
+        }
+
+        sf2->Write(sf2_file);
+        logger.information("Finished writing " + outputFile.string());
+    }
 }
 
-Poco::Logger& create_logger()
+Poco::Logger &
+create_logger()
 {
-  Poco::Logger& logger = Poco::Logger::root();
-  Poco::AutoPtr<Poco::ColorConsoleChannel> console_channel{new Poco::ColorConsoleChannel};
+    Poco::Logger &logger = Poco::Logger::root();
+    Poco::AutoPtr<Poco::ColorConsoleChannel> console_channel{new Poco::ColorConsoleChannel};
 
-  logger.setChannel(console_channel);
-  logger.setLevel(Poco::Message::PRIO_TRACE);
+    logger.setChannel(console_channel);
+    logger.setLevel(Poco::Message::PRIO_TRACE);
 
-  return logger;
+    return logger;
 }

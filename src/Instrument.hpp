@@ -1,7 +1,10 @@
 #pragma once
 
+#include <optional>
+#include <utility>
 #include <vector>
 
+#include "Oscillator.hpp"
 #include "types.hpp"
 
 namespace z2sound
@@ -10,18 +13,32 @@ namespace z2sound
 class Instrument
 {
 public:
-  struct KeyZone
-  {
-    Key lower_key_limit;
-    Key upper_key_limit;
-    uint16_t wave_id;
-    float volume_multiplier;
-    float pitch_multiplier;
-  };
+    enum class Type
+    {
+        Percussion,
+        BasicInstrument
+    };
 
-  virtual ~Instrument() = default;
+    struct KeyZone
+    {
+        Key lower_key_limit;
+        Key upper_key_limit;
+        uint16_t wave_id;
+        float volume_multiplier;
+        float pitch_multiplier;
+        float pan;
 
-  virtual std::vector<KeyZone> get_key_zones() const = 0;
+        std::optional<std::reference_wrapper<const Oscillator>> oscillator;
+        uint16_t release;
+    };
+
+    virtual ~Instrument() = default;
+
+    virtual Type
+    get_type() const = 0;
+
+    virtual std::vector<KeyZone>
+    get_key_zones() const = 0;
 };
 
 }

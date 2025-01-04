@@ -13,16 +13,20 @@ using WaveBuffer = std::span<const int16_t>;
 class WaveHandle
 {
 public:
-  explicit WaveHandle(WaveInfo wave_info);
+    explicit WaveHandle(WaveInfo wave_info);
 
-  const WaveInfo& get_wave_info() const;
-  std::optional<WaveBuffer> get_buffer() const;
+    [[nodiscard]] const WaveInfo &
+    get_wave_info() const;
 
-  void set_buffer(WaveBuffer wave_buffer);
+    [[nodiscard]] std::optional<WaveBuffer>
+    get_buffer() const;
+
+    void
+    set_buffer(WaveBuffer wave_buffer);
 
 private:
-  WaveInfo wave_info_;
-  std::optional<WaveBuffer> buffer_;
+    WaveInfo wave_info_;
+    std::optional<WaveBuffer> buffer_;
 };
 
 }

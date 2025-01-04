@@ -33,3 +33,8 @@
 
 # Build directories
 build/
+cmake-*/
+
+# IDE settings
+.vscode/
+.idea/
