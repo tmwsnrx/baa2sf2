@@ -13,14 +13,13 @@ enum class EnvelopePhase
   Stopped
 };
 
-Adsr Adsr::from_oscillator(const z2sound::Oscillator& oscillator)
+Adsr Adsr::from_oscillator(const z2sound::Oscillator &oscillator)
 {
   Adsr adsr{
-    .attack_time = std::numeric_limits<int16_t>::min(),
-    .decay_time = std::numeric_limits<int16_t>::min(),
-    .sustain_attenuation = 0,
-    .release_time = std::numeric_limits<int16_t>::min()
-  };
+      .attack_time = std::numeric_limits<int16_t>::min(),
+      .decay_time = std::numeric_limits<int16_t>::min(),
+      .sustain_attenuation = 0,
+      .release_time = std::numeric_limits<int16_t>::min()};
 
   // if (oscillator.pre_sustain.has_value())
   // {
@@ -37,7 +36,7 @@ Adsr Adsr::from_oscillator(const z2sound::Oscillator& oscillator)
   //     case z2sound::Envelope::CurveType::Stop:
   //       phase = EnvelopePhase::Sustain;
   //       break;
-      
+
   //     default:
   //       if (phase == EnvelopePhase::Attack)
   //       {
@@ -70,11 +69,11 @@ Adsr Adsr::from_oscillator(const z2sound::Oscillator& oscillator)
       case z2sound::Envelope::CurveType::Stop:
         phase = EnvelopePhase::Stopped;
         break;
-      
+
       default:
         if (phase == EnvelopePhase::Release)
         {
-          adsr.release_time = milliseconds_to_timescents(envelope_iter->time * 3);
+          adsr.release_time = adsr_ticks_to_timescents(envelope_iter->time);
         }
         break;
       }
@@ -86,12 +85,11 @@ Adsr Adsr::from_oscillator(const z2sound::Oscillator& oscillator)
 
 Adsr Adsr::from_percussion_release(uint16_t release)
 {
-  int16_t release_time = milliseconds_to_timescents(release & 0x3fff);
+  int16_t release_time = adsr_ticks_to_timescents(release & 0x3fff);
 
   return Adsr{
-    .attack_time = std::numeric_limits<int16_t>::min(),
-    .decay_time = std::numeric_limits<int16_t>::min(),
-    .sustain_attenuation = 0,
-    .release_time = release_time
-  };
+      .attack_time = std::numeric_limits<int16_t>::min(),
+      .decay_time = std::numeric_limits<int16_t>::min(),
+      .sustain_attenuation = 0,
+      .release_time = release_time};
 }
