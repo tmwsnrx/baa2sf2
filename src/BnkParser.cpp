@@ -34,15 +34,15 @@ BnkParser::parse()
     reader_ >> id;
     reader_ >> version;
 
-    if (version!=1)
+    if (version != 1)
     {
         logger_.warning("Unsupported BNK version %u. Only version 1 is supported", version);
         return std::nullopt;
     }
 
-    logger_.debug("Start parsing BNK (ID %u, wave bank %u, %u bytes)", wave_bank_id_, id, size_);
+    logger_.debug("Start parsing BNK (ID %u, wave bank %u, %u bytes)", static_cast<uint32_t>(wave_bank_id_), id, size_);
 
-    reader_.stream().seekg(4*sizeof(uint32_t), std::ios::cur);
+    reader_.stream().seekg(4 * sizeof(uint32_t), std::ios::cur);
     enumerate_chunks();
 
     logger_.debug("Found the following chunks:");
@@ -77,7 +77,7 @@ BnkParser::parse()
     InstrumentBank bank{static_cast<uint8_t>(id), wave_bank_id_};
 
     reader_.stream().seekg(envt_chunk.value().get().position);
-    const size_t num_envelopes = envt_chunk.value().get().size/6;
+    const size_t num_envelopes = envt_chunk.value().get().size / 6;
     bank.envelopes_.reserve(num_envelopes);
 
     for (size_t envelope_index = 0; envelope_index < num_envelopes; envelope_index++)
@@ -107,8 +107,8 @@ BnkParser::parse()
         uint32_t release_envt_offset{};
         reader_ >> attack_envt_offset;
         reader_ >> release_envt_offset;
-        const size_t attack_envt_index = attack_envt_offset/6;
-        const size_t release_envt_index = release_envt_offset/6;
+        const size_t attack_envt_index = attack_envt_offset / 6;
+        const size_t release_envt_index = release_envt_offset / 6;
 
         osci.pre_sustain = bank.envelopes_.cbegin() + attack_envt_index;
         osci.post_sustain = bank.envelopes_.cbegin() + release_envt_index;
@@ -128,12 +128,12 @@ BnkParser::parse()
     for (size_t instrument_index = 0; instrument_index < num_instruments; instrument_index++)
     {
         reader_.stream().seekg(
-            instrument_list_position + static_cast<std::streamoff>(instrument_index*sizeof(uint32_t)));
+            instrument_list_position + static_cast<std::streamoff>(instrument_index * sizeof(uint32_t)));
 
         uint32_t offset{};
         reader_ >> offset;
 
-        if (offset==0)
+        if (offset == 0)
         {
             bank.instruments_.emplace_back(std::unique_ptr<Instrument>{nullptr});
             continue;
@@ -144,12 +144,12 @@ BnkParser::parse()
         uint32_t marker{};
         reader_ >> marker;
 
-        if (marker==MARKER_INST_ENTRY)
+        if (marker == MARKER_INST_ENTRY)
         {
             auto instrument = parse_inst(bank.oscillators_);
             bank.instruments_.emplace_back(std::make_unique<BasicInstrument>(instrument));
         }
-        else if (marker==MARKER_PERC_ENTRY)
+        else if (marker == MARKER_PERC_ENTRY)
         {
             auto percussion_set = parse_perc();
             bank.instruments_.emplace_back(std::make_unique<PercussionSet>(percussion_set));
@@ -173,7 +173,7 @@ BnkParser::enumerate_chunks()
         uint32_t marker{};
         reader_ >> marker;
 
-        if (marker==0)
+        if (marker == 0)
         {
             break;
         }
@@ -193,7 +193,7 @@ BnkParser::enumerate_chunks()
 std::optional<std::reference_wrapper<const BnkParser::ChunkInfo>>
 BnkParser::get_chunk_info(uint32_t marker) const
 {
-    if (chunk_table_.count(marker)==1)
+    if (chunk_table_.count(marker) == 1)
     {
         return std::cref(chunk_table_.at(marker));
     }
@@ -226,7 +226,7 @@ BnkParser::parse_inst(const std::vector<Oscillator> &oscillators)
 
     uint32_t unknown_count{};
     reader_ >> unknown_count;
-    reader_.stream().seekg(unknown_count*sizeof(uint32_t), std::ios::cur);
+    reader_.stream().seekg(unknown_count * sizeof(uint32_t), std::ios::cur);
 
     uint32_t num_key_regions{};
     reader_ >> num_key_regions;
@@ -242,7 +242,7 @@ BnkParser::parse_inst(const std::vector<Oscillator> &oscillators)
         reader_ >> num_velocity_regions;
 
         // Yes, this case exists in TP's SE banks
-        if (num_velocity_regions==0)
+        if (num_velocity_regions == 0)
         {
             continue;
         }
@@ -254,7 +254,7 @@ BnkParser::parse_inst(const std::vector<Oscillator> &oscillators)
         reader_ >> key_region.pitch_multiplier;
 
         // Skip any additional velocity region
-        reader_.stream().seekg((num_velocity_regions - 1)*12, std::ios::cur);
+        reader_.stream().seekg((num_velocity_regions - 1) * 12, std::ios::cur);
 
         instrument.key_regions_.emplace_back(key_region);
     }
@@ -277,12 +277,12 @@ BnkParser::parse_perc()
 
     for (size_t entry = 0; entry < num_entries; entry++)
     {
-        reader_.stream().seekg(list_position + static_cast<std::streamoff>(entry*sizeof(uint32_t)));
+        reader_.stream().seekg(list_position + static_cast<std::streamoff>(entry * sizeof(uint32_t)));
 
         uint32_t offset{};
         reader_ >> offset;
 
-        if (offset==0)
+        if (offset == 0)
         {
             continue;
         }
@@ -302,7 +302,7 @@ BnkParser::parse_perc()
         uint32_t num_velocity_regions{};
         reader_ >> num_velocity_regions;
 
-        if (num_velocity_regions==0)
+        if (num_velocity_regions == 0)
         {
             continue;
         }

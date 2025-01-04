@@ -15,7 +15,7 @@ create_logger();
 int
 main(int argc, char **argv)
 {
-    if (argc!=4)
+    if (argc != 4)
     {
         std::cout << "Usage: " << argv[0] << " <*.baa> <wave folder> <output folder>" << std::endl;
         return -1;
@@ -55,7 +55,7 @@ main(int argc, char **argv)
 
         for (auto &group : wave_bank.get_wave_groups())
         {
-            logger.information("Loading %s", group.get_filename());
+            logger.information("Decoding %s", group.get_filename());
             wave_pool.load_group(group);
         }
 
@@ -76,7 +76,7 @@ main(int argc, char **argv)
 
         std::ostringstream filename_stream;
         filename_stream << baaPath.stem().string() << "_" << std::to_string(wave_bank_id) << ".sf2";
-        std::filesystem::path outputFile = outputFolder/filename_stream.str();
+        std::filesystem::path outputFile = outputFolder / filename_stream.str();
 
         std::ofstream sf2_file{outputFile, std::ios::binary};
 

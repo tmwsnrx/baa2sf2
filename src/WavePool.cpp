@@ -24,7 +24,7 @@ void
 WavePool::load_group(const WaveGroup &wave_group)
 {
     std::filesystem::path wave_archive_file{wave_group.get_filename()};
-    auto full_path = base_directory_/wave_archive_file;
+    auto full_path = base_directory_ / wave_archive_file;
 
     std::ifstream wave_archive{full_path.c_str(), std::ios::binary | std::ios::in};
     if (!wave_archive)
@@ -39,12 +39,12 @@ WavePool::load_group(const WaveGroup &wave_group)
 
         wave_archive.seekg(entry.data_offset);
 
-        const size_t num_buffers = wave_info.data_length/9;
+        const size_t num_buffers = wave_info.data_length / 9;
 
         std::vector<uint8_t> encoded_samples;
         encoded_samples.reserve(wave_info.data_length);
 
-        std::vector<int16_t> decoded_samples(num_buffers*16, 0);
+        std::vector<int16_t> decoded_samples(num_buffers * 16, 0);
 
         for (size_t offset = 0; offset < wave_info.data_length; offset++)
         {
@@ -57,11 +57,11 @@ WavePool::load_group(const WaveGroup &wave_group)
 
         for (size_t i = 0; i < num_buffers; i++)
         {
-            assert((i + 1)*16 <= decoded_samples.size());
-            std::span<const uint8_t, 9> source{encoded_samples.cbegin() + i*9,
-                                               encoded_samples.cbegin() + (i + 1)*9};
-            std::span<int16_t, 16> destination{decoded_samples.begin() + i*16,
-                                               decoded_samples.begin() + (i + 1)*16};
+            assert((i + 1) * 16 <= decoded_samples.size());
+            std::span<const uint8_t, 9> source{encoded_samples.cbegin() + i * 9,
+                                               encoded_samples.cbegin() + (i + 1) * 9};
+            std::span<int16_t, 16> destination{decoded_samples.begin() + i * 16,
+                                               decoded_samples.begin() + (i + 1) * 16};
             afc_decoder.decode_buffer(source, destination);
         }
 

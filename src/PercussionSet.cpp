@@ -29,8 +29,8 @@ PercussionSet::get_key_zones() const
             .lower_key_limit = key,
             .upper_key_limit = key,
             .wave_id = percussion_entry.sample_id,
-            .volume_multiplier = percussion_entry.volume_multiplier*percussion_entry.volume_multiplier_2,
-            .pitch_multiplier = percussion_entry.pitch_multiplier*percussion_entry.pitch_multiplier_2,
+            .volume_multiplier = percussion_entry.volume_multiplier * percussion_entry.volume_multiplier_2,
+            .pitch_multiplier = percussion_entry.pitch_multiplier * percussion_entry.pitch_multiplier_2,
             .pan = to_float_pan(percussion_entry.pan),
 
             .oscillator = std::nullopt,
@@ -48,16 +48,16 @@ PercussionSet::get_key_zones() const
 static constexpr float
 to_float_pan(uint8_t pan)
 {
-    if (pan==64)
+    if (pan == 64)
     {
         return 0.0f;
     }
     else if (pan < 64)
     {
-        return (static_cast<float>(pan)/63.0f) - 1.0f;
+        return (static_cast<float>(pan) / 63.0f) - 1.0f;
     }
     else
     {
-        return static_cast<float>(pan - 64)/63.0f;
+        return static_cast<float>(pan - 64) / 63.0f;
     }
 }

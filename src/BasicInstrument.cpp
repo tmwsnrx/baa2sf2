@@ -20,8 +20,8 @@ BasicInstrument::get_key_zones() const
             .lower_key_limit = lower_key,
             .upper_key_limit = key_region.upper_key_limit,
             .wave_id = key_region.sample_id,
-            .volume_multiplier = key_region.volume_multiplier*volume_multiplier_,
-            .pitch_multiplier = key_region.pitch_multiplier*pitch_multiplier_,
+            .volume_multiplier = key_region.volume_multiplier * volume_multiplier_,
+            .pitch_multiplier = key_region.pitch_multiplier * pitch_multiplier_,
             .pan = 0.0f,
 
             .oscillator = oscillator_,

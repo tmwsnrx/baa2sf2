@@ -37,7 +37,7 @@ WsysParser::parse()
 
     for (size_t group = 0; group < group_count; group++)
     {
-        reader_.stream().seekg(base_offset_ + wbct_offset + 12 + group*4);
+        reader_.stream().seekg(base_offset_ + wbct_offset + 12 + group * 4);
 
         uint32_t scne_offset{};
         reader_ >> scne_offset;
@@ -51,7 +51,7 @@ WsysParser::parse()
         reader_ >> num_waves;
 
         uint32_t group_offset{};
-        reader_.stream().seekg(base_offset_ + winf_offset + 8 + group*4);
+        reader_.stream().seekg(base_offset_ + winf_offset + 8 + group * 4);
         reader_ >> group_offset;
         reader_.stream().seekg(base_offset_ + group_offset);
 
@@ -65,7 +65,7 @@ WsysParser::parse()
 
         for (size_t wave = 0; wave < num_waves; wave++)
         {
-            reader_.stream().seekg(base_offset_ + group_offset + 0x74 + wave*4);
+            reader_.stream().seekg(base_offset_ + group_offset + 0x74 + wave * 4);
 
             uint32_t wave_offset{};
             reader_ >> wave_offset;
@@ -83,7 +83,7 @@ WsysParser::parse()
 
             int32_t loop_indicator;
             reader_ >> loop_indicator;
-            wave_info.is_looping = loop_indicator==-1;
+            wave_info.is_looping = loop_indicator == -1;
 
             reader_ >> wave_info.loop_start;
             reader_ >> wave_info.loop_end;
@@ -93,7 +93,7 @@ WsysParser::parse()
             reader_ >> wave_info._unknown3;
             reader_ >> wave_info._unknown4;
 
-            reader_.stream().seekg(base_offset_ + cdf_offset + 8 + wave*4);
+            reader_.stream().seekg(base_offset_ + cdf_offset + 8 + wave * 4);
 
             uint32_t cdf_entry_offset{};
             reader_ >> cdf_entry_offset;

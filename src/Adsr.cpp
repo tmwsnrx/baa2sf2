@@ -59,7 +59,7 @@ Adsr::from_oscillator(const z2sound::Oscillator &oscillator)
     {
         EnvelopePhase phase = EnvelopePhase::Release;
 
-        for (auto envelope_iter = *oscillator.post_sustain; phase!=EnvelopePhase::Stopped; envelope_iter++)
+        for (auto envelope_iter = *oscillator.post_sustain; phase != EnvelopePhase::Stopped; envelope_iter++)
         {
             auto curve_type = envelope_iter->get_curve_type();
 
@@ -71,7 +71,7 @@ Adsr::from_oscillator(const z2sound::Oscillator &oscillator)
                     break;
 
                 default:
-                    if (phase==EnvelopePhase::Release)
+                    if (phase == EnvelopePhase::Release)
                     {
                         adsr.release_time = adsr_ticks_to_timescents(envelope_iter->time);
                     }

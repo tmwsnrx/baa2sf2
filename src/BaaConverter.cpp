@@ -5,6 +5,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include <format>
 
 #include "Adsr.hpp"
 #include "UnitConversions.hpp"
@@ -23,31 +24,25 @@ BaaConverter::to_sf2(uint8_t wave_bank_no)
     samples_.clear();
 
     sf2_.set_comment("WIP version");
-    sf2_.set_bank_name("Wave Bank " + std::to_string(wave_bank_no));
+    sf2_.set_bank_name(std::format("Wave Bank (WSYS) {}", wave_bank_no));
 
     const auto &baa = audio_archive_.get();
 
     auto wave_bank_iter = baa.wave_banks_.find(wave_bank_no);
-    if (wave_bank_iter==baa.wave_banks_.end())
+    if (wave_bank_iter == baa.wave_banks_.end())
     {
         return std::nullopt;
     }
 
     const auto &wave_bank = wave_bank_iter->second;
 
-    // for (const auto& wave : wave_bank.get_wave_table())
-    // {
-    //   wave->wave_info_.
-    // }
-
     for (const auto &[instrument_bank_id, instrument_bank] : baa.instrument_banks_)
     {
-        if (instrument_bank.get_wave_bank_id()!=wave_bank_no)
+        if (instrument_bank.get_wave_bank_id() != wave_bank_no)
         {
             continue;
         }
 
-        auto instrument_bank_string = std::to_string(instrument_bank_id);
         const auto &instruments = instrument_bank.get_instruments();
 
         for (size_t instrument_no = 0; const auto &instrument : instruments)
@@ -58,9 +53,8 @@ BaaConverter::to_sf2(uint8_t wave_bank_no)
                 continue;
             }
 
-            auto name = std::to_string(instrument_no);
-
-            auto sf2instrument = sf2_.NewInstrument("Instrument_" + instrument_bank_string + "_" + name);
+            auto sf2instrument =
+                sf2_.NewInstrument(std::format("Instrument_{:03}_{:03}", instrument_bank_id, instrument_no));
 
             for (const auto &key_zone : instrument->get_key_zones())
             {
@@ -80,7 +74,7 @@ BaaConverter::to_sf2(uint8_t wave_bank_no)
                 {
                     adsr = Adsr::from_oscillator(*key_zone.oscillator);
                 }
-                else if (key_zone.release!=0)
+                else if (key_zone.release != 0)
                 {
                     adsr = Adsr::from_percussion_release(key_zone.release);
                 }
@@ -100,13 +94,13 @@ BaaConverter::to_sf2(uint8_t wave_bank_no)
                         SFGeneratorItem{SFGenerator::kReleaseVolEnv, GenAmountType{adsr.release_time}}},
                     std::vector<SFModulatorItem>{}};
 
-                if (instrument->get_type()==z2sound::Instrument::Type::Percussion)
+                if (instrument->get_type() == z2sound::Instrument::Type::Percussion)
                 {
                     instrument_zone.SetGenerator(
                         SFGeneratorItem{SFGenerator::kOverridingRootKey, GenAmountType{key_zone.lower_key_limit}});
                 }
 
-                if (!(sample->get()->start_loop()==0 && sample->get()->end_loop()==0))
+                if (!(sample->get()->start_loop() == 0 && sample->get()->end_loop() == 0))
                 {
                     instrument_zone.SetGenerator(
                         SFGeneratorItem{SFGenerator::kSampleModes,
@@ -117,9 +111,9 @@ BaaConverter::to_sf2(uint8_t wave_bank_no)
             }
 
             uint16_t preset_no = instrument_no & 0x7f;
-            uint16_t bank_no = instrument_bank_id*2 + (instrument_no >> 7);
+            uint16_t bank_no = instrument_bank_id * 2 + (instrument_no >> 7);
 
-            sf2_.NewPreset("Preset_" + name, preset_no, bank_no,
+            sf2_.NewPreset(std::format("Preset_{:03}", instrument_no), preset_no, bank_no,
                            std::vector<sf2cute::SFPresetZone>{
                                sf2cute::SFPresetZone{sf2instrument}});
 
@@ -135,7 +129,7 @@ BaaConverter::fetch_sample(const z2sound::WaveBank &wave_bank, uint16_t wave_id)
 {
     const auto sample_iter = samples_.find(wave_id);
 
-    if (sample_iter==samples_.end())
+    if (sample_iter == samples_.end())
     {
         const auto wave_handle = wave_bank.get_wave_table().at(wave_id);
         if (!wave_handle.has_value())

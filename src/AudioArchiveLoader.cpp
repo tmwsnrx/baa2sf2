@@ -43,7 +43,7 @@ AudioArchiveLoader::load()
     uint32_t marker{};
     reader_ >> marker;
 
-    if (marker!=MARKER_BEGIN_ARCHIVE)
+    if (marker != MARKER_BEGIN_ARCHIVE)
     {
         logger_.error("File is not a valid audio archive");
         return std::nullopt;
@@ -116,7 +116,7 @@ void
 AudioArchiveLoader::skip_marker(uint32_t marker, size_t num_words)
 {
     logger_.debug("Skipping marker %s", marker_to_string(marker));
-    reader_.stream().seekg(num_words*sizeof(uint32_t), std::ios::cur);
+    reader_.stream().seekg(num_words * sizeof(uint32_t), std::ios::cur);
 }
 
 void
