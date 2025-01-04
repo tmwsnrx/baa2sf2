@@ -1,7 +1,5 @@
-#include <cassert>
 #include <fstream>
 #include <iostream>
-#include <map>
 #include <vector>
 
 #include "Poco/ConsoleChannel.h"
@@ -13,15 +11,25 @@
 
 Poco::Logger& create_logger();
 
-int main(int, char**)
+int main(int argc, char** argv)
 {
+    if (argc != 4)
+    {
+        std::cout << "Usage: " << argv[0] << " <*.baa> <wave folder> <output folder>" << std::endl;
+        return -1;
+    }
+
+    std::filesystem::path baaPath = argv[1];
+    std::string waveFolder = argv[2];
+    std::filesystem::path outputFolder{argv[3]};
+
   Poco::Logger& logger = create_logger();
 
-  std::ifstream sound_file{"Z2Sound.baa", std::ios::in | std::ios::binary};
+  std::ifstream sound_file{baaPath, std::ios::in | std::ios::binary};
 
   if (!sound_file)
   {
-    std::cout << "Could not open Z2Sound.baa" << std::endl;
+    std::cout << "Could not open " << baaPath << std::endl;
   }
 
   z2sound::AudioArchiveLoader loader{sound_file, logger};
@@ -36,7 +44,7 @@ int main(int, char**)
 
   auto bgm_bank_iterator = audio_archive->wave_banks_.find(wave_bank_no);
   z2sound::WavePool wave_pool{bgm_bank_iterator->second};
-  wave_pool.set_base_directory("/home/tim/roms/TP/files/Audiores/Waves");
+  wave_pool.set_base_directory(waveFolder);
 
   for (auto& group : bgm_bank_iterator->second.get_wave_groups())
   {
@@ -55,11 +63,20 @@ int main(int, char**)
     return -1;
   }
 
-  auto filename = "TP_Bank_" + std::to_string(wave_bank_no) + ".sf2";
+  std::ostringstream filename_stream;
+    filename_stream << baaPath.stem().string() << "_" << std::to_string(wave_bank_no) << ".sf2";
+  std::filesystem::path outputFile = outputFolder / filename_stream.str();
 
-  std::ofstream sf2_file{filename, std::ios::binary};
+  std::ofstream sf2_file{outputFile, std::ios::binary};
+
+  if (!sf2_file)
+  {
+    logger.error("Could not open output file %s for writing", outputFile.string());
+    return -1;
+  }
+
   sf2->Write(sf2_file);
-  logger.information("Finished writing " + filename);
+  logger.information("Finished writing " + outputFile.string());
 
   // for (const auto& bank : audio_archive->instrument_banks_)
   // {
@@ -78,11 +95,11 @@ int main(int, char**)
   //     return -1;
   //   }
 
-  //   auto filename = "TP_Bank_" + std::to_string(bank_id) + ".sf2";
+  //   auto outputFile = "TP_Bank_" + std::to_string(bank_id) + ".sf2";
 
-  //   std::ofstream sf2_file{filename, std::ios::binary};
+  //   std::ofstream sf2_file{outputFile, std::ios::binary};
   //   sf2->Write(sf2_file);
-  //   logger.information("Finished writing " + filename);
+  //   logger.information("Finished writing " + outputFile);
   // }
 }
 
