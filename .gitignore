@@ -36,4 +36,5 @@ build/
 cmake-*/
 
 # IDE settings
+.vscode/
 .idea/
