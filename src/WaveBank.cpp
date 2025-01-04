@@ -4,21 +4,26 @@ namespace z2sound
 {
 
 WaveBank::WaveBank(uint8_t id)
-: id_{id} {}
-
-uint8_t WaveBank::get_id() const
+    : id_{id}
 {
-  return id_;
 }
 
-const std::vector<WaveGroup> WaveBank::get_wave_groups() const
+uint8_t
+WaveBank::get_id() const
 {
-  return wave_groups_;
+    return id_;
 }
 
-const WaveBank::WaveTable& WaveBank::get_wave_table() const
+std::vector<WaveGroup>
+WaveBank::get_wave_groups() const
 {
-  return wave_table_;
+    return wave_groups_;
+}
+
+const WaveBank::WaveTable &
+WaveBank::get_wave_table() const
+{
+    return wave_table_;
 }
 
 }

@@ -13,29 +13,32 @@ namespace z2sound
 class Instrument
 {
 public:
-  enum class Type
-  {
-    Percussion,
-    BasicInstrument
-  };
+    enum class Type
+    {
+        Percussion,
+        BasicInstrument
+    };
 
-  struct KeyZone
-  {
-    Key lower_key_limit;
-    Key upper_key_limit;
-    uint16_t wave_id;
-    float volume_multiplier;
-    float pitch_multiplier;
-    float pan;
+    struct KeyZone
+    {
+        Key lower_key_limit;
+        Key upper_key_limit;
+        uint16_t wave_id;
+        float volume_multiplier;
+        float pitch_multiplier;
+        float pan;
 
-    std::optional<std::reference_wrapper<const Oscillator>> oscillator;
-    uint16_t release;
-  };
+        std::optional<std::reference_wrapper<const Oscillator>> oscillator;
+        uint16_t release;
+    };
 
-  virtual ~Instrument() = default;
+    virtual ~Instrument() = default;
 
-  virtual Type get_type() const = 0;
-  virtual std::vector<KeyZone> get_key_zones() const = 0;
+    virtual Type
+    get_type() const = 0;
+
+    virtual std::vector<KeyZone>
+    get_key_zones() const = 0;
 };
 
 }

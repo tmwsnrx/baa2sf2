@@ -30,134 +30,139 @@ static constexpr uint32_t MARKER_WS = 0x77732020;
 namespace z2sound
 {
 
-AudioArchiveLoader::AudioArchiveLoader(std::istream& stream, Poco::Logger& logger)
-: reader_{stream, Poco::BinaryReader::BIG_ENDIAN_BYTE_ORDER}, logger_{logger}
-{}
-
-std::optional<AudioArchive> AudioArchiveLoader::load()
+AudioArchiveLoader::AudioArchiveLoader(std::istream &stream, Poco::Logger &logger)
+    : reader_{stream, Poco::BinaryReader::BIG_ENDIAN_BYTE_ORDER}, logger_{logger}
 {
-  reader_.stream().seekg(0);
-
-  uint32_t marker{};
-  reader_ >> marker;
-
-  if (marker != MARKER_BEGIN_ARCHIVE)
-  {
-    logger_.error("File is not a valid audio archive");
-    return std::nullopt;
-  }
-
-  logger_.information("Found valid archive begin marker, start parsing");
-  while (read_command());
-
-  logger_.information("Done parsing");
-  return std::move(archive_);
 }
 
-bool AudioArchiveLoader::read_command()
+std::optional<AudioArchive>
+AudioArchiveLoader::load()
 {
-  uint32_t marker{};
-  reader_ >> marker;
+    reader_.stream().seekg(0);
 
-  switch (marker)
-  {
-    case MARKER_END_ARCHIVE:
-      return false;
+    uint32_t marker{};
+    reader_ >> marker;
 
-    case MARKER_BNK:
+    if (marker!=MARKER_BEGIN_ARCHIVE)
     {
-      uint32_t group{};
-      uint32_t offset{};
-
-      reader_ >> group;
-      reader_ >> offset;
-
-      logger_.information("bnk (group=%u, offset=%x)", group, offset);
-
-      save_position();
-      read_bnk(group, offset);
-      restore_position();
-
-      break;
+        logger_.error("File is not a valid audio archive");
+        return std::nullopt;
     }
 
-    case MARKER_BSC:
-    case MARKER_BST:
-    case MARKER_BSTN:
-      skip_marker(marker, 2);
-      break;
+    logger_.information("Found valid archive begin marker, start parsing");
+    while (read_command());
 
-    case MARKER_WS:
+    logger_.information("Done parsing");
+    return std::move(archive_);
+}
+
+bool
+AudioArchiveLoader::read_command()
+{
+    uint32_t marker{};
+    reader_ >> marker;
+
+    switch (marker)
     {
-      uint32_t group{};
-      uint32_t offset{};
+        case MARKER_END_ARCHIVE:return false;
 
-      reader_ >> group;
-      reader_ >> offset;
-      reader_.stream().seekg(4, std::ios::cur);
+        case MARKER_BNK:
+        {
+            uint32_t group{};
+            uint32_t offset{};
 
-      logger_.information("ws (group=%u, offset=%x)", group, offset);
+            reader_ >> group;
+            reader_ >> offset;
 
-      save_position();
-      read_wsys(group, offset);
-      restore_position();
+            logger_.information("bnk (group=%u, offset=%x)", group, offset);
 
-      break;
+            save_position();
+            read_bnk(group, offset);
+            restore_position();
+
+            break;
+        }
+
+        case MARKER_BSC:
+        case MARKER_BST:
+        case MARKER_BSTN:skip_marker(marker, 2);
+            break;
+
+        case MARKER_WS:
+        {
+            uint32_t group{};
+            uint32_t offset{};
+
+            reader_ >> group;
+            reader_ >> offset;
+            reader_.stream().seekg(4, std::ios::cur);
+
+            logger_.information("ws (group=%u, offset=%x)", group, offset);
+
+            save_position();
+            read_wsys(group, offset);
+            restore_position();
+
+            break;
+        }
+
+        default:return false;
     }
 
-    default:
-      return false;
-  }
-
-  return true;
+    return true;
 }
 
-void AudioArchiveLoader::skip_marker(uint32_t marker, size_t num_words)
+void
+AudioArchiveLoader::skip_marker(uint32_t marker, size_t num_words)
 {
-  logger_.debug("Skipping marker %s", marker_to_string(marker));
-  reader_.stream().seekg(num_words * sizeof(uint32_t), std::ios::cur);
+    logger_.debug("Skipping marker %s", marker_to_string(marker));
+    reader_.stream().seekg(num_words*sizeof(uint32_t), std::ios::cur);
 }
 
-void AudioArchiveLoader::read_bnk(uint32_t group, uint32_t offset)
+void
+AudioArchiveLoader::read_bnk(uint32_t group, uint32_t offset)
 {
-  reader_.stream().seekg(offset + sizeof(uint32_t), std::ios::beg);
+    reader_.stream().seekg(offset + sizeof(uint32_t), std::ios::beg);
 
-  BnkParser bnk_parser{group, reader_.stream(), offset, logger_};
-  auto instrument_bank = bnk_parser.parse();
+    BnkParser bnk_parser{group, reader_.stream(), offset, logger_};
+    auto instrument_bank = bnk_parser.parse();
 
-  if (!instrument_bank.has_value())
-  {
-    logger_.error("Failed to parse IBNK");
-    return;
-  }
+    if (!instrument_bank.has_value())
+    {
+        logger_.error("Failed to parse IBNK");
+        return;
+    }
 
-  archive_.instrument_banks_.emplace(instrument_bank->get_id(), std::move(*instrument_bank));
+    archive_.instrument_banks_.emplace(instrument_bank->get_id(), std::move(*instrument_bank));
 }
 
-void AudioArchiveLoader::read_wsys(uint32_t bank_id, uint32_t offset)
+void
+AudioArchiveLoader::read_wsys(uint32_t bank_id, uint32_t offset)
 {
-  reader_.stream().seekg(offset + sizeof(uint32_t), std::ios::beg);
+    reader_.stream().seekg(offset + sizeof(uint32_t), std::ios::beg);
 
-  WsysParser wsys_parser{bank_id, reader_.stream(), offset, logger_};
-  auto wave_bank = wsys_parser.parse();
+    WsysParser wsys_parser{bank_id, reader_.stream(), offset, logger_};
+    auto wave_bank = wsys_parser.parse();
 
-  if (!wave_bank.has_value())
-  {
-    logger_.error("Failed to parse WSYS %u", bank_id);
-    return;
-  }
+    if (!wave_bank.has_value())
+    {
+        logger_.error("Failed to parse WSYS %u", bank_id);
+        return;
+    }
 
-  archive_.wave_banks_.emplace(wave_bank->get_id(), std::move(*wave_bank));
+    archive_.wave_banks_.emplace(wave_bank->get_id(), std::move(*wave_bank));
 }
 
-void AudioArchiveLoader::save_position()
+void
+AudioArchiveLoader::save_position()
 {
-  saved_position_ = reader_.stream().tellg();
+    saved_position_ = reader_.stream().tellg();
 }
 
-void AudioArchiveLoader::restore_position()
+void
+AudioArchiveLoader::restore_position()
 {
-  reader_.stream().seekg(saved_position_, std::ios::beg);
+    reader_.stream().seekg(saved_position_, std::ios::beg);
 }
 
 }

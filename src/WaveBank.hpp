@@ -12,23 +12,28 @@ namespace z2sound
 
 class WaveBank
 {
-friend class WavePool;
-friend class WsysParser;
+    friend class WavePool;
+
+    friend class WsysParser;
 
 public:
-  using WaveTable = std::vector<std::optional<WaveHandle>>;
+    using WaveTable = std::vector<std::optional<WaveHandle>>;
 
-  explicit WaveBank(uint8_t id);
+    explicit WaveBank(uint8_t id);
 
-  uint8_t get_id() const;
+    [[nodiscard]] uint8_t
+    get_id() const;
 
-  const std::vector<WaveGroup> get_wave_groups() const;
-  const WaveTable& get_wave_table() const;
+    [[nodiscard]] std::vector<WaveGroup>
+    get_wave_groups() const;
+
+    [[nodiscard]] const WaveTable &
+    get_wave_table() const;
 
 private:
-  uint8_t id_;
-  std::vector<WaveGroup> wave_groups_;
-  WaveTable wave_table_;
+    uint8_t id_;
+    std::vector<WaveGroup> wave_groups_;
+    WaveTable wave_table_;
 };
 
 }

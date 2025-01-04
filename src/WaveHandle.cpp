@@ -4,21 +4,26 @@ namespace z2sound
 {
 
 WaveHandle::WaveHandle(WaveInfo wave_info)
-: wave_info_{wave_info} {}
-
-const WaveInfo& WaveHandle::get_wave_info() const
+    : wave_info_{wave_info}
 {
-  return wave_info_;
 }
 
-std::optional<WaveBuffer> WaveHandle::get_buffer() const
+const WaveInfo &
+WaveHandle::get_wave_info() const
 {
-  return buffer_;
+    return wave_info_;
 }
 
-void WaveHandle::set_buffer(WaveBuffer wave_buffer)
+std::optional<WaveBuffer>
+WaveHandle::get_buffer() const
 {
-  buffer_ = wave_buffer;
+    return buffer_;
+}
+
+void
+WaveHandle::set_buffer(WaveBuffer wave_buffer)
+{
+    buffer_ = wave_buffer;
 }
 
 }
