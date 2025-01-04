@@ -1,9 +1,11 @@
-cmake_minimum_required(VERSION 3.0.0)
+cmake_minimum_required(VERSION 3.15.0)
 project(baa2sf2 VERSION 0.1.0)
 
 set (CMAKE_CXX_STANDARD 20)
+set (BUILD_SHARED_LIBS OFF)
+set (POCO_STATIC ON)
 
-find_package(Poco REQUIRED Foundation)
+find_package(Poco REQUIRED COMPONENTS Foundation CONFIG)
 
 add_subdirectory(sf2cute)
 

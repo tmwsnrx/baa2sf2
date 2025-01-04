@@ -33,3 +33,7 @@
 
 # Build directories
 build/
+cmake-*/
+
+# IDE settings
+.idea/
